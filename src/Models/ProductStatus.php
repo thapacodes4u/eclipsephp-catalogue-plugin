@@ -2,9 +2,11 @@
 
 namespace Eclipse\Catalogue\Models;
 
+use Eclipse\Catalogue\Enums\StructuredData\ItemAvailability;
 use Eclipse\Catalogue\Factories\ProductStatusFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 use Spatie\Translatable\HasTranslations;
 
 class ProductStatus extends Model
@@ -59,7 +61,7 @@ class ProductStatus extends Model
             'is_default' => 'boolean',
             'priority' => 'integer',
             'skip_stock_qty_check' => 'boolean',
-            'sd_item_availability' => \Eclipse\Catalogue\Enums\StructuredData\ItemAvailability::class,
+            'sd_item_availability' => ItemAvailability::class,
         ];
     }
 
@@ -76,12 +78,12 @@ class ProductStatus extends Model
         static::saving(function ($model) {
             // Validate code length
             if (strlen($model->code) > 20) {
-                throw new \InvalidArgumentException('Code must not exceed 20 characters.');
+                throw new InvalidArgumentException('Code must not exceed 20 characters.');
             }
 
             // Validate required fields
             if (empty($model->title) || empty($model->label_type) || empty($model->priority) || empty($model->sd_item_availability)) {
-                throw new \InvalidArgumentException('Required fields cannot be empty.');
+                throw new InvalidArgumentException('Required fields cannot be empty.');
             }
         });
 

@@ -2,9 +2,11 @@
 
 namespace Eclipse\Catalogue\Jobs;
 
+use Eclipse\Catalogue\Enums\PropertyType;
 use Eclipse\Catalogue\Models\Property;
 use Eclipse\Catalogue\Models\PropertyValue;
 use Eclipse\Catalogue\Values\Background;
+use Eclipse\Common\Enums\JobStatus;
 use Eclipse\Common\Foundation\Jobs\QueueableJob;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -65,7 +67,7 @@ class ImportColorValues extends QueueableJob
     protected function execute(): void
     {
         $property = Property::find($this->propertyId);
-        if (! $property || $property->type !== \Eclipse\Catalogue\Enums\PropertyType::COLOR->value) {
+        if (! $property || $property->type !== PropertyType::COLOR->value) {
             throw new Exception('Invalid property or property is not a color type.');
         }
 
@@ -197,11 +199,11 @@ class ImportColorValues extends QueueableJob
      */
     protected function getNotificationTitle(): string
     {
-        if ($this->status === \Eclipse\Common\Enums\JobStatus::COMPLETED) {
+        if ($this->status === JobStatus::COMPLETED) {
             return __('eclipse-catalogue::property-value.notifications.import_completed.title');
         }
 
-        if ($this->status === \Eclipse\Common\Enums\JobStatus::FAILED) {
+        if ($this->status === JobStatus::FAILED) {
             return __('eclipse-catalogue::property-value.notifications.import_failed.title');
         }
 
@@ -213,7 +215,7 @@ class ImportColorValues extends QueueableJob
      */
     protected function getNotificationBody(): string
     {
-        if ($this->status === \Eclipse\Common\Enums\JobStatus::COMPLETED) {
+        if ($this->status === JobStatus::COMPLETED) {
             $body = __('eclipse-catalogue::property-value.notifications.import_completed.body', [
                 'inserted' => $this->stats['inserted'],
                 'skipped' => $this->stats['skipped'],
@@ -231,7 +233,7 @@ class ImportColorValues extends QueueableJob
             return $body;
         }
 
-        if ($this->status === \Eclipse\Common\Enums\JobStatus::FAILED) {
+        if ($this->status === JobStatus::FAILED) {
             $message = $this->exception?->getMessage();
 
             return $message ?: __('eclipse-catalogue::property-value.notifications.import_queued.body');

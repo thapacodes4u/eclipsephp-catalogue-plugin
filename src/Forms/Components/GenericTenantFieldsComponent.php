@@ -3,13 +3,15 @@
 namespace Eclipse\Catalogue\Forms\Components;
 
 use Eclipse\Catalogue\Livewire\TenantSwitcher;
-use Filament\Forms\Components\Component;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
 /**
  * Generic per-tenant fields builder for Filament forms.
@@ -52,13 +54,13 @@ class GenericTenantFieldsComponent
                 TenantSwitcher::make('selected_tenant'),
 
                 // Hidden field to store all tenant data
-                \Filament\Forms\Components\Hidden::make('all_tenant_data')
+                Hidden::make('all_tenant_data')
                     ->default([])
                     ->dehydrated(true),
 
                 // Hidden field to track previous tenant for switching logic
-                \Filament\Forms\Components\Hidden::make('_previous_tenant')
-                    ->default(\Filament\Facades\Filament::getTenant()?->id)
+                Hidden::make('_previous_tenant')
+                    ->default(Filament::getTenant()?->id)
                     ->dehydrated(false),
 
                 ...static::getTenantSpecificFields($tenants, $tenantFlags, $mutuallyExclusiveFlagSets, $translationPrefix, $extraFieldsBuilder),

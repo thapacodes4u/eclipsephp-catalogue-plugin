@@ -4,11 +4,11 @@ namespace Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages;
 
 use Eclipse\Catalogue\Enums\PropertyType;
 use Eclipse\Catalogue\Filament\Resources\PropertyResource;
-use Eclipse\Catalogue\Filament\Resources\PropertyResource\RelationManagers;
-use Filament\Actions;
-use Filament\Actions\LocaleSwitcher;
+use Eclipse\Catalogue\Filament\Resources\PropertyResource\RelationManagers\ValuesRelationManager;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Resources\Pages\EditRecord\Concerns\Translatable;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable;
 
 class EditProperty extends EditRecord
 {
@@ -25,7 +25,7 @@ class EditProperty extends EditRecord
     {
         return [
             LocaleSwitcher::make(),
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 
@@ -34,7 +34,7 @@ class EditProperty extends EditRecord
         $managers = [];
 
         if ($this->getRecord() && $this->getRecord()->type === PropertyType::LIST->value) {
-            $managers[] = RelationManagers\ValuesRelationManager::class;
+            $managers[] = ValuesRelationManager::class;
         }
 
         return $managers;

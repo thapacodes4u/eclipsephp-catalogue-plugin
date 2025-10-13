@@ -3,13 +3,22 @@
 namespace Eclipse\Catalogue\Filament\Resources\ProductResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\ProductResource;
+use Eclipse\Catalogue\Models\Group;
 use Eclipse\Catalogue\Models\Property;
+use Eclipse\Catalogue\Models\PropertyValue;
 use Eclipse\Catalogue\Traits\HandlesTenantData;
 use Eclipse\Catalogue\Traits\HasTenantFields;
-use Filament\Actions;
-use Filament\Forms\Form;
+use Eclipse\Core\Models\Locale;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable;
 use Nben\FilamentRecordNav\Actions\NextRecordAction;
 use Nben\FilamentRecordNav\Actions\PreviousRecordAction;
 use Nben\FilamentRecordNav\Concerns\WithRecordNavigation;
@@ -17,8 +26,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class EditProduct extends EditRecord
 {
-    use EditRecord\Concerns\Translatable;
     use HandlesTenantData, HasTenantFields;
+    use Translatable;
     use WithRecordNavigation;
 
     protected static string $resource = ProductResource::class;
@@ -28,11 +37,11 @@ class EditProduct extends EditRecord
         return [
             PreviousRecordAction::make(),
             NextRecordAction::make(),
-            Actions\LocaleSwitcher::make(),
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-            Actions\ForceDeleteAction::make(),
-            Actions\RestoreAction::make(),
+            LocaleSwitcher::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
         ];
     }
 
@@ -116,7 +125,7 @@ class EditProduct extends EditRecord
         }
 
         $data['tenant_data'] = $tenantData;
-        $currentTenant = \Filament\Facades\Filament::getTenant();
+        $currentTenant = Filament::getTenant();
         $data['selected_tenant'] = $currentTenant?->id;
 
         return $data;
@@ -146,7 +155,7 @@ class EditProduct extends EditRecord
             }
 
             foreach ($propertyData as $propertyId => $values) {
-                $idsToDetach = \Eclipse\Catalogue\Models\PropertyValue::query()
+                $idsToDetach = PropertyValue::query()
                     ->where('property_id', $propertyId)
                     ->pluck('id')
                     ->all();
@@ -208,9 +217,9 @@ class EditProduct extends EditRecord
         return [];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form;
+        return $schema;
     }
 
     protected function getFormActions(): array
@@ -252,14 +261,14 @@ class EditProduct extends EditRecord
         $toDetach = array_values(array_diff($currentGroupIds, $desiredGroupIds));
 
         foreach ($toAttach as $groupId) {
-            $group = \Eclipse\Catalogue\Models\Group::find($groupId);
+            $group = Group::find($groupId);
             if ($group) {
                 $group->addProduct($record);
             }
         }
 
         foreach ($toDetach as $groupId) {
-            $group = \Eclipse\Catalogue\Models\Group::find($groupId);
+            $group = Group::find($groupId);
             if ($group) {
                 $group->removeProduct($record);
             }
@@ -281,8 +290,8 @@ class EditProduct extends EditRecord
      */
     protected function getAvailableLocales(): array
     {
-        if (class_exists(\Eclipse\Core\Models\Locale::class)) {
-            return \Eclipse\Core\Models\Locale::getAvailableLocales()->pluck('id')->toArray();
+        if (class_exists(Locale::class)) {
+            return Locale::getAvailableLocales()->pluck('id')->toArray();
         }
 
         return ['en'];

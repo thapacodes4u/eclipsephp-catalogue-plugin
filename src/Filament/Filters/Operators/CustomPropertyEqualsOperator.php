@@ -2,7 +2,6 @@
 
 namespace Eclipse\Catalogue\Filament\Filters\Operators;
 
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\QueryBuilder\Constraints\Operators\Operator;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +47,7 @@ class CustomPropertyEqualsOperator extends Operator
     /**
      * Get the form schema of the operator.
      *
-     * @return array<Component>
+     * @return array<\Filament\Schemas\Components\Component>
      */
     public function getFormSchema(): array
     {

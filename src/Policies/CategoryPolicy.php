@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eclipse\Catalogue\Policies;
 
 use Eclipse\Catalogue\Models\Category;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Contracts\Auth\Access\Authorizable;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class CategoryPolicy
 {
@@ -13,7 +15,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(Authorizable $user): bool
+    public function viewAny(AuthUser $user): bool
     {
         return $user->can('view_any_category');
     }
@@ -21,7 +23,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(Authorizable $user, Category $category): bool
+    public function view(AuthUser $user, Category $category): bool
     {
         return $user->can('view_category');
     }
@@ -29,7 +31,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(Authorizable $user): bool
+    public function create(AuthUser $user): bool
     {
         return $user->can('create_category');
     }
@@ -37,7 +39,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(Authorizable $user, Category $category): bool
+    public function update(AuthUser $user, Category $category): bool
     {
         return $user->can('update_category');
     }
@@ -45,7 +47,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(Authorizable $user, Category $category): bool
+    public function delete(AuthUser $user, Category $category): bool
     {
         return $user->can('delete_category');
     }
@@ -53,7 +55,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can bulk delete.
      */
-    public function deleteAny(Authorizable $user): bool
+    public function deleteAny(AuthUser $user): bool
     {
         return $user->can('delete_any_category');
     }
@@ -61,7 +63,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(Authorizable $user, Category $category): bool
+    public function forceDelete(AuthUser $user, Category $category): bool
     {
         return $user->can('force_delete_category');
     }
@@ -69,7 +71,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can permanently bulk delete.
      */
-    public function forceDeleteAny(Authorizable $user): bool
+    public function forceDeleteAny(AuthUser $user): bool
     {
         return $user->can('force_delete_any_category');
     }
@@ -77,7 +79,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can restore.
      */
-    public function restore(Authorizable $user, Category $category): bool
+    public function restore(AuthUser $user, Category $category): bool
     {
         return $user->can('restore_category');
     }
@@ -85,7 +87,7 @@ class CategoryPolicy
     /**
      * Determine whether the user can bulk restore.
      */
-    public function restoreAny(Authorizable $user): bool
+    public function restoreAny(AuthUser $user): bool
     {
         return $user->can('restore_any_category');
     }

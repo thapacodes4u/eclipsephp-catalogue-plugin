@@ -1,11 +1,12 @@
 <?php
 
 use Eclipse\Catalogue\Models\ProductStatus;
+use Workbench\App\Models\Site;
 
 beforeEach(function () {
     $this->migrate();
     $this->setUpSuperAdminAndTenant();
-    $this->site = \Workbench\App\Models\Site::first();
+    $this->site = Site::first();
 });
 
 it('can create a product status', function () {

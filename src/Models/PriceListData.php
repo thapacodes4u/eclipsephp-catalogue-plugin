@@ -2,6 +2,8 @@
 
 namespace Eclipse\Catalogue\Models;
 
+use Eclipse\Catalogue\Factories\PriceListDataFactory;
+use Eclipse\Core\Models\Site;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,7 +48,7 @@ class PriceListData extends Model
     /** @return BelongsTo<\Eclipse\Core\Models\Site, self> */
     public function site(): BelongsTo
     {
-        return $this->belongsTo(\Eclipse\Core\Models\Site::class);
+        return $this->belongsTo(Site::class);
     }
 
     /**
@@ -63,6 +65,6 @@ class PriceListData extends Model
 
     protected static function newFactory()
     {
-        return \Eclipse\Catalogue\Factories\PriceListDataFactory::new();
+        return PriceListDataFactory::new();
     }
 }

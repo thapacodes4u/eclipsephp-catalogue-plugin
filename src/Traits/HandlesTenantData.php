@@ -2,6 +2,8 @@
 
 namespace Eclipse\Catalogue\Traits;
 
+use Illuminate\Validation\ValidationException;
+
 /**
  * Page-level helpers for Filament resources to handle per-tenant form state.
  *
@@ -172,7 +174,7 @@ trait HandlesTenantData
                     foreach ($activeFlags as $flag) {
                         $errors[$flag] = 'These options cannot be enabled simultaneously.';
                     }
-                    throw \Illuminate\Validation\ValidationException::withMessages($errors);
+                    throw ValidationException::withMessages($errors);
                 }
             }
 
@@ -204,7 +206,7 @@ trait HandlesTenantData
         }
 
         if (! empty($errors)) {
-            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+            throw ValidationException::withMessages($errors);
         }
     }
 

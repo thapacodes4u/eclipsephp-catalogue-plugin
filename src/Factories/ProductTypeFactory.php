@@ -3,6 +3,7 @@
 namespace Eclipse\Catalogue\Factories;
 
 use Eclipse\Catalogue\Models\ProductType;
+use Eclipse\Core\Models\Locale;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductTypeFactory extends Factory
@@ -35,8 +36,8 @@ class ProductTypeFactory extends Factory
      */
     protected function getAvailableLocales(): array
     {
-        if (class_exists(\Eclipse\Core\Models\Locale::class)) {
-            return \Eclipse\Core\Models\Locale::getAvailableLocales()
+        if (class_exists(Locale::class)) {
+            return Locale::getAvailableLocales()
                 ->pluck('id')
                 ->toArray();
         }

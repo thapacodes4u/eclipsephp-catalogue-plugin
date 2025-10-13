@@ -4,13 +4,14 @@ namespace Eclipse\Catalogue\Casts;
 
 use Eclipse\Catalogue\Values\Background;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 
 class BackgroundCast implements CastsAttributes
 {
     /**
      * Cast the attribute from the database.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model  The model instance.
+     * @param  Model  $model  The model instance.
      * @param  string  $key  The attribute name.
      * @param  mixed  $value  The attribute value.
      * @param  array  $attributes  The attributes array.
@@ -37,7 +38,7 @@ class BackgroundCast implements CastsAttributes
     /**
      * Cast the attribute to a database value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model  The model instance.
+     * @param  Model  $model  The model instance.
      * @param  string  $key  The attribute name.
      * @param  mixed  $value  The attribute value.
      * @param  array  $attributes  The attributes array.

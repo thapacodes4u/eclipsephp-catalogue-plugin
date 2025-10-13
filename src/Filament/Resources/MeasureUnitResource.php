@@ -2,18 +2,19 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Eclipse\Catalogue\Filament\Resources\MeasureUnitResource\Pages;
+use Eclipse\Catalogue\Filament\Resources\MeasureUnitResource\Pages\CreateMeasureUnit;
+use Eclipse\Catalogue\Filament\Resources\MeasureUnitResource\Pages\EditMeasureUnit;
+use Eclipse\Catalogue\Filament\Resources\MeasureUnitResource\Pages\ListMeasureUnits;
 use Eclipse\Catalogue\Models\MeasureUnit;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\RestoreAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -21,15 +22,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class MeasureUnitResource extends Resource implements HasShieldPermissions
+class MeasureUnitResource extends Resource
 {
     protected static ?string $model = MeasureUnit::class;
 
     protected static ?string $slug = 'measure-units';
 
-    protected static ?string $navigationIcon = 'heroicon-o-scale';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-scale';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -43,10 +44,10 @@ class MeasureUnitResource extends Resource implements HasShieldPermissions
         return __('eclipse-catalogue::measure-unit.plural');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label(__('eclipse-catalogue::measure-unit.fields.name'))
                     ->required()
@@ -96,7 +97,7 @@ class MeasureUnitResource extends Resource implements HasShieldPermissions
             ->filters([
                 TrashedFilter::make(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
                 RestoreAction::make(),
@@ -107,9 +108,9 @@ class MeasureUnitResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMeasureUnits::route('/'),
-            'create' => Pages\CreateMeasureUnit::route('/create'),
-            'edit' => Pages\EditMeasureUnit::route('/{record}/edit'),
+            'index' => ListMeasureUnits::route('/'),
+            'create' => CreateMeasureUnit::route('/create'),
+            'edit' => EditMeasureUnit::route('/{record}/edit'),
         ];
     }
 
@@ -119,21 +120,5 @@ class MeasureUnitResource extends Resource implements HasShieldPermissions
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-        ];
     }
 }

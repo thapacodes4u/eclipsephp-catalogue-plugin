@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Eclipse\Catalogue\Policies;
 
 use Eclipse\Catalogue\Models\TaxClass;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Contracts\Auth\Access\Authorizable;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class TaxClassPolicy
 {
@@ -13,90 +15,90 @@ class TaxClassPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(Authorizable $user): bool
+    public function viewAny(AuthUser $user): bool
     {
-        return $user->can('view_any_tax::class');
+        return $user->can('view_any_tax_class');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(Authorizable $user, TaxClass $taxClass): bool
+    public function view(AuthUser $user, TaxClass $taxClass): bool
     {
-        return $user->can('view_tax::class');
+        return $user->can('view_tax_class');
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(Authorizable $user): bool
+    public function create(AuthUser $user): bool
     {
-        return $user->can('create_tax::class');
+        return $user->can('create_tax_class');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(Authorizable $user, TaxClass $taxClass): bool
+    public function update(AuthUser $user, TaxClass $taxClass): bool
     {
-        return $user->can('update_tax::class');
+        return $user->can('update_tax_class');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(Authorizable $user, TaxClass $taxClass): bool
+    public function delete(AuthUser $user, TaxClass $taxClass): bool
     {
         // Prevent deletion of default class
         if ($taxClass->is_default) {
             return false;
         }
 
-        return $user->can('delete_tax::class');
+        return $user->can('delete_tax_class');
     }
 
     /**
      * Determine whether the user can bulk delete.
      */
-    public function deleteAny(Authorizable $user): bool
+    public function deleteAny(AuthUser $user): bool
     {
-        return $user->can('delete_any_tax::class');
+        return $user->can('delete_any_tax_class');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(Authorizable $user, TaxClass $taxClass): bool
+    public function forceDelete(AuthUser $user, TaxClass $taxClass): bool
     {
         // Prevent force deletion of default class
         if ($taxClass->is_default) {
             return false;
         }
 
-        return $user->can('force_delete_tax::class');
+        return $user->can('force_delete_tax_class');
     }
 
     /**
      * Determine whether the user can permanently bulk delete.
      */
-    public function forceDeleteAny(Authorizable $user): bool
+    public function forceDeleteAny(AuthUser $user): bool
     {
-        return $user->can('force_delete_any_tax::class');
+        return $user->can('force_delete_any_tax_class');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(Authorizable $user, TaxClass $taxClass): bool
+    public function restore(AuthUser $user, TaxClass $taxClass): bool
     {
-        return $user->can('restore_tax::class');
+        return $user->can('restore_tax_class');
     }
 
     /**
      * Determine whether the user can bulk restore.
      */
-    public function restoreAny(Authorizable $user): bool
+    public function restoreAny(AuthUser $user): bool
     {
-        return $user->can('restore_any_tax::class');
+        return $user->can('restore_any_tax_class');
     }
 }

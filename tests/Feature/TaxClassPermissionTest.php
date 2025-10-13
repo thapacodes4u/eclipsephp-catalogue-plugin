@@ -1,6 +1,5 @@
 <?php
 
-use Eclipse\Catalogue\Filament\Resources\TaxClassResource;
 use Eclipse\Catalogue\Filament\Resources\TaxClassResource\Pages\ListTaxClasses;
 use Eclipse\Catalogue\Models\TaxClass;
 use Eclipse\Catalogue\Policies\TaxClassPolicy;
@@ -57,12 +56,11 @@ test('unauthorized access can be prevented', function () {
         'is_default' => false,
     ]);
 
-    // View table
-    $this->get(TaxClassResource::getUrl())
-        ->assertForbidden();
+    // Authorization: user should not be able to view any
+    expect((new TaxClassPolicy)->viewAny($this->user))->toBeFalse();
 
     // Add direct permission to view the table, since otherwise any other action below is not available even for testing
-    $this->user->givePermissionTo('view_any_tax::class');
+    $this->user->givePermissionTo('view_any_tax_class');
 
     // Create tax class
     livewire(ListTaxClasses::class)
@@ -82,6 +80,9 @@ test('unauthorized access can be prevented', function () {
     $this->assertSoftDeleted($taxClass);
 
     livewire(ListTaxClasses::class)
+        ->filterTable('trashed')
+        ->assertTableActionExists('restore')
+        ->assertTableActionExists('forceDelete')
         ->assertTableActionDisabled('restore', $taxClass)
         ->assertTableActionDisabled('forceDelete', $taxClass);
 });

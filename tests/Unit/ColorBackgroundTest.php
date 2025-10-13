@@ -26,7 +26,7 @@ it('validates property type enum constraints', function () {
     // Test invalid types throw exception
     expect(function () {
         Property::factory()->create(['type' => 'invalid']);
-    })->toThrow(\InvalidArgumentException::class, 'Invalid type');
+    })->toThrow(InvalidArgumentException::class, 'Invalid type');
 });
 
 it('validates background type enum constraints', function () {

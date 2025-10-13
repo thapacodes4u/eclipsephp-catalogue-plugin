@@ -2,15 +2,16 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Eclipse\Catalogue\Filament\Resources\PriceListResource\Pages;
+use Eclipse\Catalogue\Filament\Resources\PriceListResource\Pages\CreatePriceList;
+use Eclipse\Catalogue\Filament\Resources\PriceListResource\Pages\EditPriceList;
+use Eclipse\Catalogue\Filament\Resources\PriceListResource\Pages\ListPriceLists;
 use Eclipse\Catalogue\Models\PriceList;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -18,15 +19,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PriceListResource extends Resource implements HasShieldPermissions
+class PriceListResource extends Resource
 {
     protected static ?string $model = PriceList::class;
 
     protected static ?string $slug = 'price-lists';
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -94,7 +95,7 @@ class PriceListResource extends Resource implements HasShieldPermissions
             ->filters([
                 TrashedFilter::make(),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
                     DeleteAction::make(),
@@ -107,9 +108,9 @@ class PriceListResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPriceLists::route('/'),
-            'create' => Pages\CreatePriceList::route('/create'),
-            'edit' => Pages\EditPriceList::route('/{record}/edit'),
+            'index' => ListPriceLists::route('/'),
+            'create' => CreatePriceList::route('/create'),
+            'edit' => EditPriceList::route('/{record}/edit'),
         ];
     }
 
@@ -119,21 +120,5 @@ class PriceListResource extends Resource implements HasShieldPermissions
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-        ];
     }
 }

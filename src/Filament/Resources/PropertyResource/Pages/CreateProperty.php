@@ -3,9 +3,9 @@
 namespace Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\PropertyResource;
-use Filament\Actions\LocaleSwitcher;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\CreateRecord\Concerns\Translatable;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\CreateRecord\Concerns\Translatable;
 
 class CreateProperty extends CreateRecord
 {

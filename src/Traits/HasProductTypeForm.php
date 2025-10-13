@@ -3,10 +3,10 @@
 namespace Eclipse\Catalogue\Traits;
 
 use Eclipse\Catalogue\Forms\Components\GenericTenantFieldsComponent;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 
 trait HasProductTypeForm
 {

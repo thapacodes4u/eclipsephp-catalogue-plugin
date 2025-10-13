@@ -2,18 +2,23 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Eclipse\Catalogue\Filament\Resources\ProductStatusResource\Pages;
+use Eclipse\Catalogue\Enums\StructuredData\ItemAvailability;
+use Eclipse\Catalogue\Filament\Resources\ProductStatusResource\Pages\CreateProductStatus;
+use Eclipse\Catalogue\Filament\Resources\ProductStatusResource\Pages\EditProductStatus;
+use Eclipse\Catalogue\Filament\Resources\ProductStatusResource\Pages\ListProductStatuses;
 use Eclipse\Catalogue\Models\ProductStatus;
 use Eclipse\Catalogue\Support\LabelType;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Concerns\Translatable;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -21,16 +26,17 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 
-class ProductStatusResource extends Resource implements HasShieldPermissions
+class ProductStatusResource extends Resource
 {
     use Translatable;
 
     protected static ?string $model = ProductStatus::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-check-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
     protected static ?string $slug = 'product-statuses';
 
@@ -51,9 +57,9 @@ class ProductStatusResource extends Resource implements HasShieldPermissions
         return __('eclipse-catalogue::product-status.plural');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Section::make(__('eclipse-catalogue::product-status.singular'))
                 ->schema([
                     TextInput::make('title')->label(__('eclipse-catalogue::product-status.fields.title'))
@@ -71,7 +77,7 @@ class ProductStatusResource extends Resource implements HasShieldPermissions
                                 modifyRuleUsing: function ($rule, $livewire) {
                                     $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
                                     if ($tenantFK) {
-                                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                                        $currentTenant = Filament::getTenant();
                                         if ($currentTenant) {
                                             $rule->where($tenantFK, $currentTenant->id);
                                         }
@@ -99,26 +105,26 @@ class ProductStatusResource extends Resource implements HasShieldPermissions
                 ])->columns(1),
             Section::make(__('eclipse-catalogue::product-status.sections.visibility_rules'))->schema([
                 Grid::make(3)->schema([
-                    \Filament\Forms\Components\Toggle::make('shown_in_browse')->label(__('eclipse-catalogue::product-status.fields.shown_in_browse'))
+                    Toggle::make('shown_in_browse')->label(__('eclipse-catalogue::product-status.fields.shown_in_browse'))
                         ->helperText(__('eclipse-catalogue::product-status.help_text.shown_in_browse'))
                         ->default(true),
-                    \Filament\Forms\Components\Toggle::make('allow_price_display')->label(__('eclipse-catalogue::product-status.fields.allow_price_display'))
+                    Toggle::make('allow_price_display')->label(__('eclipse-catalogue::product-status.fields.allow_price_display'))
                         ->helperText(__('eclipse-catalogue::product-status.help_text.allow_price_display'))
                         ->default(true)
                         ->live(),
-                    \Filament\Forms\Components\Toggle::make('allow_sale')->label(__('eclipse-catalogue::product-status.fields.allow_sale'))
+                    Toggle::make('allow_sale')->label(__('eclipse-catalogue::product-status.fields.allow_sale'))
                         ->helperText(__('eclipse-catalogue::product-status.help_text.allow_sale'))
                         ->default(true)
                         ->disabled(fn ($get) => $get('allow_price_display') === false),
-                    \Filament\Forms\Components\Toggle::make('is_default')->label(__('eclipse-catalogue::product-status.fields.is_default'))
+                    Toggle::make('is_default')->label(__('eclipse-catalogue::product-status.fields.is_default'))
                         ->helperText(__('eclipse-catalogue::product-status.help_text.is_default'))
                         ->default(false),
-                    \Filament\Forms\Components\Toggle::make('skip_stock_qty_check')->label(__('eclipse-catalogue::product-status.fields.skip_stock_qty_check'))
+                    Toggle::make('skip_stock_qty_check')->label(__('eclipse-catalogue::product-status.fields.skip_stock_qty_check'))
                         ->helperText(__('eclipse-catalogue::product-status.help_text.skip_stock_qty_check'))
                         ->default(false),
                     Select::make('sd_item_availability')->label(__('eclipse-catalogue::product-status.fields.sd_item_availability'))
                         ->helperText(new HtmlString(__('eclipse-catalogue::product-status.help_text.sd_item_availability')))
-                        ->options(\Eclipse\Catalogue\Enums\StructuredData\ItemAvailability::class)
+                        ->options(ItemAvailability::class)
                         ->searchable()
                         ->required(),
                 ]),
@@ -141,18 +147,18 @@ class ProductStatusResource extends Resource implements HasShieldPermissions
             TextColumn::make('priority')->label(__('eclipse-catalogue::product-status.fields.priority'))->numeric(),
         ])->filters([
             TernaryFilter::make('shown_in_browse')->label(__('eclipse-catalogue::product-status.fields.shown_in_browse')),
-        ])->actions([
-            \Filament\Tables\Actions\EditAction::make(),
-            \Filament\Tables\Actions\DeleteAction::make(),
+        ])->recordActions([
+            EditAction::make(),
+            DeleteAction::make(),
         ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProductStatuses::route('/'),
-            'create' => Pages\CreateProductStatus::route('/create'),
-            'edit' => Pages\EditProductStatus::route('/{record}/edit'),
+            'index' => ListProductStatuses::route('/'),
+            'create' => CreateProductStatus::route('/create'),
+            'edit' => EditProductStatus::route('/{record}/edit'),
         ];
     }
 
@@ -163,24 +169,12 @@ class ProductStatusResource extends Resource implements HasShieldPermissions
         // Filter by current tenant if tenancy is enabled
         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
         if ($tenantFK) {
-            $currentTenant = \Filament\Facades\Filament::getTenant();
+            $currentTenant = Filament::getTenant();
             if ($currentTenant) {
                 $query->where($tenantFK, $currentTenant->id);
             }
         }
 
         return $query;
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'delete',
-            'delete_any',
-        ];
     }
 }

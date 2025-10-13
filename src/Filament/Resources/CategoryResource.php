@@ -2,33 +2,34 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages;
+use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages\CreateCategory;
+use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages\EditCategory;
+use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages\ListCategories;
+use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages\SortingCategory;
 use Eclipse\Catalogue\Models\Category;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
-use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -41,8 +42,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 
-class CategoryResource extends Resource implements HasShieldPermissions
+class CategoryResource extends Resource
 {
     use Translatable;
 
@@ -50,9 +52,9 @@ class CategoryResource extends Resource implements HasShieldPermissions
 
     protected static ?string $slug = 'catalogue/categories';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -68,10 +70,10 @@ class CategoryResource extends Resource implements HasShieldPermissions
         return __('eclipse-catalogue::categories.title');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make(__('eclipse-catalogue::categories.form.sections.basic_information'))
                     ->columns(2)
                     ->schema([
@@ -334,7 +336,7 @@ class CategoryResource extends Resource implements HasShieldPermissions
                     ->toggle(),
 
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
                         ->label(__('eclipse-catalogue::categories.actions.edit')),
@@ -351,7 +353,7 @@ class CategoryResource extends Resource implements HasShieldPermissions
                     ->color('gray')
                     ->button(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label(__('eclipse-catalogue::categories.actions.delete')),
@@ -366,10 +368,10 @@ class CategoryResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
-            'create' => Pages\CreateCategory::route('/create'),
-            'sorting' => Pages\SortingCategory::route('/sorting'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            'index' => ListCategories::route('/'),
+            'create' => CreateCategory::route('/create'),
+            'sorting' => SortingCategory::route('/sorting'),
+            'edit' => EditCategory::route('/{record}/edit'),
         ];
     }
 
@@ -384,21 +386,5 @@ class CategoryResource extends Resource implements HasShieldPermissions
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'short_desc', 'description', 'sef_key', 'code'];
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-        ];
     }
 }

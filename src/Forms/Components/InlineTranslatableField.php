@@ -3,15 +3,16 @@
 namespace Eclipse\Catalogue\Forms\Components;
 
 use Closure;
-use Filament\Forms\Components\Component;
+use Eclipse\Core\Models\Locale;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
@@ -280,8 +281,8 @@ class InlineTranslatableField
      */
     protected function getAvailableLocales(): array
     {
-        if (class_exists(\Eclipse\Core\Models\Locale::class)) {
-            return \Eclipse\Core\Models\Locale::getAvailableLocales()->pluck('id')->toArray();
+        if (class_exists(Locale::class)) {
+            return Locale::getAvailableLocales()->pluck('id')->toArray();
         }
 
         return ['en'];

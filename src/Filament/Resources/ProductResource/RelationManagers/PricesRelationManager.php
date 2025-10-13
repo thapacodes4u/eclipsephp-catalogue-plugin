@@ -2,14 +2,22 @@
 
 namespace Eclipse\Catalogue\Filament\Resources\ProductResource\RelationManagers;
 
+use Carbon\Carbon;
 use Eclipse\Catalogue\Models\PriceList;
-use Filament\Forms;
+use Eclipse\Catalogue\Models\Product\Price;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -20,9 +28,9 @@ class PricesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'price';
 
-    public function form(Forms\Form $form): Forms\Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Select::make('price_list_id')
                 ->label(__('eclipse-catalogue::product.price.fields.price_list'))
                 ->relationship('priceList', 'name')
@@ -30,7 +38,7 @@ class PricesRelationManager extends RelationManager
                 ->preload()
                 ->searchable()
                 ->live()
-                ->afterStateUpdated(function ($state, Forms\Set $set) {
+                ->afterStateUpdated(function ($state, Set $set) {
                     if (! $state) {
                         return;
                     }
@@ -51,7 +59,7 @@ class PricesRelationManager extends RelationManager
                 ->native(false)
                 ->default(fn () => now())
                 ->required()
-                ->rule(function (Forms\Get $get) {
+                ->rule(function (Get $get) {
                     return function (string $attribute, $value, $fail) use ($get) {
                         if (empty($value)) {
                             return;
@@ -63,10 +71,10 @@ class PricesRelationManager extends RelationManager
                             return;
                         }
 
-                        $query = \Eclipse\Catalogue\Models\Product\Price::query()
+                        $query = Price::query()
                             ->where('product_id', $productId)
                             ->where('price_list_id', $priceListId)
-                            ->whereDate('valid_from', \Carbon\Carbon::parse($value)->toDateString());
+                            ->whereDate('valid_from', Carbon::parse($value)->toDateString());
 
                         $current = method_exists($this, 'getMountedTableActionRecord') ? $this->getMountedTableActionRecord() : null;
                         if ($current) {
@@ -125,18 +133,18 @@ class PricesRelationManager extends RelationManager
             ->paginated(false)
             ->filters([])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label(__('eclipse-catalogue::product.price.actions.add')),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                     ->label(__('filament-actions::edit.single.label')),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->label(__('filament-actions::delete.single.label')),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

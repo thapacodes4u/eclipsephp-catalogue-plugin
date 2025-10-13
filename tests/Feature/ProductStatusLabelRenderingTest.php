@@ -2,11 +2,12 @@
 
 use Eclipse\Catalogue\Models\ProductStatus;
 use Eclipse\Catalogue\Support\LabelType;
+use Workbench\App\Models\Site;
 
 beforeEach(function () {
     $this->migrate();
     $this->setUpSuperAdminAndTenant();
-    $this->site = \Workbench\App\Models\Site::first();
+    $this->site = Site::first();
 });
 
 it('renders correct badge class for each label type', function () {

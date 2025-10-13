@@ -2,7 +2,8 @@
 
 namespace Eclipse\Catalogue\Filament\Forms\Components;
 
-use Filament\Forms\Components\Actions\Action;
+use Exception;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -12,6 +13,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Storage;
+use Str;
 
 class ImageManager extends Field
 {
@@ -106,7 +109,7 @@ class ImageManager extends Field
                                     'position' => $index,
                                 ])
                                 ->toMediaCollection($this->collection);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                         }
                     }
                 }
@@ -150,7 +153,7 @@ class ImageManager extends Field
                     $locales[$locale] = $plugin->getLocaleLabel($locale) ?? $locale;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         if (empty($locales)) {
@@ -167,7 +170,7 @@ class ImageManager extends Field
             if ($livewire && property_exists($livewire, 'activeLocale')) {
                 return $livewire->activeLocale;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         return app()->getLocale();
@@ -181,7 +184,7 @@ class ImageManager extends Field
             ->color('primary')
             ->modalHeading('Upload Images')
             ->modalSubmitActionLabel('Upload')
-            ->form([
+            ->schema([
                 FileUpload::make('files')
                     ->label('Choose files')
                     ->multiple()
@@ -219,10 +222,10 @@ class ImageManager extends Field
                                     'id' => null,
                                     'temp_id' => $tempId,
                                     'temp_file' => $filePath,
-                                    'uuid' => (string) \Str::uuid(),
-                                    'url' => \Storage::url($filePath),
-                                    'thumb_url' => \Storage::url($filePath),
-                                    'preview_url' => \Storage::url($filePath),
+                                    'uuid' => (string) Str::uuid(),
+                                    'url' => Storage::url($filePath),
+                                    'thumb_url' => Storage::url($filePath),
+                                    'preview_url' => Storage::url($filePath),
                                     'name' => [],
                                     'description' => [],
                                     'is_cover' => count($currentState) === 0,
@@ -292,7 +295,7 @@ class ImageManager extends Field
             ->color('gray')
             ->modalHeading('Add Images from URLs')
             ->modalSubmitActionLabel('Add Images')
-            ->form([
+            ->schema([
                 Textarea::make('urls')
                     ->label('Image URLs')
                     ->placeholder("https://example.com/image1.jpg\nhttps://example.com/image2.jpg")
@@ -323,7 +326,7 @@ class ImageManager extends Field
                                 'id' => null,
                                 'temp_id' => $tempId,
                                 'temp_url' => $url,
-                                'uuid' => (string) \Str::uuid(),
+                                'uuid' => (string) Str::uuid(),
                                 'url' => $url,
                                 'thumb_url' => $url,
                                 'preview_url' => $url,
@@ -380,7 +383,7 @@ class ImageManager extends Field
                                 ->toMediaCollection($this->collection);
 
                             $successCount++;
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $failedUrls[] = $url;
                         }
                     } else {
@@ -474,7 +477,7 @@ class ImageManager extends Field
             ->label('Edit Image')
             ->modalHeading('Edit Image Details')
             ->modalSubmitActionLabel('Save Changes')
-            ->form(function (array $arguments) {
+            ->schema(function (array $arguments) {
                 $args = $arguments['arguments'] ?? $arguments;
                 $uuid = $args['uuid'] ?? null;
                 $selectedLocale = $args['selectedLocale'] ?? $this->getSelectedLocale();

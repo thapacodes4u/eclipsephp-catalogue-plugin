@@ -4,6 +4,7 @@ namespace Eclipse\Catalogue\Models;
 
 use Eclipse\Catalogue\Factories\ProductTypeFactory;
 use Eclipse\Catalogue\Traits\HasTenantScopedData;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -67,7 +68,7 @@ class ProductType extends Model
     public static function getDefault(?int $tenantId = null): ?self
     {
         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-        $currentTenantId = $tenantId ?: \Filament\Facades\Filament::getTenant()?->id;
+        $currentTenantId = $tenantId ?: Filament::getTenant()?->id;
 
         $query = static::whereHas('productTypeData', function ($q) use ($tenantFK, $currentTenantId) {
             $q->where('is_default', true);

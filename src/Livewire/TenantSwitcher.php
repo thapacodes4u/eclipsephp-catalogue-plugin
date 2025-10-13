@@ -3,7 +3,6 @@
 namespace Eclipse\Catalogue\Livewire;
 
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
 use Livewire\Component as LivewireComponent;
 
@@ -48,7 +47,7 @@ class TenantSwitcher extends LivewireComponent
     /**
      * Create a Filament Select component used within the form schema.
      */
-    public static function make(string $fieldName = 'selected_tenant'): Component
+    public static function make(string $fieldName = 'selected_tenant'): \Filament\Schemas\Components\Component
     {
         $tenantModel = config('eclipse-catalogue.tenancy.model');
 
@@ -110,7 +109,7 @@ class TenantSwitcher extends LivewireComponent
         array $options = [],
         ?string $label = null,
         ?string $placeholder = null
-    ): Component {
+    ): \Filament\Schemas\Components\Component {
         $tenantModel = config('eclipse-catalogue.tenancy.model');
 
         if (! $tenantModel) {

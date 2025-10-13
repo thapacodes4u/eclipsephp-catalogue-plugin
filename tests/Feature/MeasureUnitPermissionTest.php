@@ -55,7 +55,7 @@ test('unauthorized access can be prevented', function () {
         ->assertForbidden();
 
     // Add direct permission to view the table, since otherwise any other action below is not available even for testing
-    $this->user->givePermissionTo('view_any_measure::unit');
+    $this->user->givePermissionTo('view_any_measure_unit');
 
     // Create measure unit
     livewire(ListMeasureUnits::class)
@@ -75,6 +75,9 @@ test('unauthorized access can be prevented', function () {
     $this->assertSoftDeleted($measureUnit);
 
     livewire(ListMeasureUnits::class)
+        ->filterTable('trashed')
+        ->assertTableActionExists('restore')
+        ->assertTableActionExists('forceDelete')
         ->assertTableActionDisabled('restore', $measureUnit)
         ->assertTableActionDisabled('forceDelete', $measureUnit);
 });

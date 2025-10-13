@@ -3,7 +3,10 @@
 namespace Eclipse\Catalogue\Traits;
 
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
+use ReflectionClass;
 
 /**
  * Adds per-tenant data behavior to an Eloquent model.
@@ -52,7 +55,7 @@ trait HasTenantScopedData
      */
     protected function getTenantDataRelationName(): string
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $property = $reflection->getProperty('tenantDataRelation');
         $property->setAccessible(true);
 
@@ -64,7 +67,7 @@ trait HasTenantScopedData
      */
     protected function getTenantDataModelClass(): string
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $property = $reflection->getProperty('tenantDataModel');
         $property->setAccessible(true);
 
@@ -76,7 +79,7 @@ trait HasTenantScopedData
      */
     protected function getTenantFlags(): array
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $property = $reflection->getProperty('tenantFlags');
         $property->setAccessible(true);
 
@@ -88,7 +91,7 @@ trait HasTenantScopedData
      */
     protected function getMutuallyExclusiveFlagSets(): array
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $property = $reflection->getProperty('mutuallyExclusiveFlagSets');
         $property->setAccessible(true);
 
@@ -100,7 +103,7 @@ trait HasTenantScopedData
      */
     protected static function getStaticMutuallyExclusiveFlagSets(): array
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $property = $reflection->getProperty('mutuallyExclusiveFlagSets');
         $property->setAccessible(true);
 
@@ -112,7 +115,7 @@ trait HasTenantScopedData
      */
     protected function getUniqueFlagsPerTenant(): array
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $property = $reflection->getProperty('uniqueFlagsPerTenant');
         $property->setAccessible(true);
 
@@ -124,7 +127,7 @@ trait HasTenantScopedData
      */
     protected function getTenantAttributes(): array
     {
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         if ($reflection->hasProperty('tenantAttributes')) {
             $property = $reflection->getProperty('tenantAttributes');
             $property->setAccessible(true);
@@ -149,7 +152,7 @@ trait HasTenantScopedData
 
         // Second pass: ensure only fillable keys for data model persist
         $dataModelClass = $this->getTenantDataModelClass();
-        /** @var \Illuminate\Database\Eloquent\Model $dataModel */
+        /** @var Model $dataModel */
         $dataModel = new $dataModelClass;
         $fillable = array_flip($dataModel->getFillable());
 
@@ -379,7 +382,7 @@ trait HasTenantScopedData
                 foreach ($activeFlags as $flag) {
                     $errors[$errorKey ? "{$errorKey}.{$flag}" : $flag] = 'These options cannot be enabled simultaneously.';
                 }
-                throw \Illuminate\Validation\ValidationException::withMessages($errors);
+                throw ValidationException::withMessages($errors);
             }
         }
 
@@ -422,7 +425,7 @@ trait HasTenantScopedData
                     foreach ($activeFlags as $flag) {
                         $errors[$flag] = 'These options cannot be enabled simultaneously.';
                     }
-                    throw \Illuminate\Validation\ValidationException::withMessages($errors);
+                    throw ValidationException::withMessages($errors);
                 }
             }
 
@@ -454,7 +457,7 @@ trait HasTenantScopedData
         }
 
         if (! empty($errors)) {
-            throw \Illuminate\Validation\ValidationException::withMessages($errors);
+            throw ValidationException::withMessages($errors);
         }
     }
 }

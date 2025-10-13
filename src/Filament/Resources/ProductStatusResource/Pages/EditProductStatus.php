@@ -3,9 +3,11 @@
 namespace Eclipse\Catalogue\Filament\Resources\ProductStatusResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\ProductStatusResource;
-use Filament\Actions;
+use Eclipse\Catalogue\Models\ProductStatus;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Resources\Pages\EditRecord\Concerns\Translatable;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable;
 
 class EditProductStatus extends EditRecord
 {
@@ -23,7 +25,7 @@ class EditProductStatus extends EditRecord
         // Ensure only one default per tenant/site
         if (! empty($data['is_default'])) {
             $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-            $query = \Eclipse\Catalogue\Models\ProductStatus::query()->where('is_default', true)->where('id', '!=', $this->record->id);
+            $query = ProductStatus::query()->where('is_default', true)->where('id', '!=', $this->record->id);
             if ($tenantFK) {
                 $query->where($tenantFK, $this->record->getAttribute($tenantFK));
             }
@@ -36,8 +38,8 @@ class EditProductStatus extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(),
-            Actions\DeleteAction::make(),
+            LocaleSwitcher::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -4,9 +4,11 @@ namespace Eclipse\Catalogue\Models;
 
 use Eclipse\Catalogue\Enums\PropertyInputType;
 use Eclipse\Catalogue\Factories\ProductFactory;
+use Eclipse\Catalogue\Models\Product\Price;
 use Eclipse\Catalogue\Traits\HasTenantScopedData;
 use Eclipse\Common\Foundation\Models\IsSearchable;
 use Eclipse\World\Models\Country;
+use Eclipse\World\Models\TariffCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -127,7 +129,7 @@ class Product extends Model implements HasMedia
 
     public function tariffCode(): BelongsTo
     {
-        return $this->belongsTo(\Eclipse\World\Models\TariffCode::class, 'tariff_code_id');
+        return $this->belongsTo(TariffCode::class, 'tariff_code_id');
     }
 
     /**
@@ -159,7 +161,7 @@ class Product extends Model implements HasMedia
      */
     public function prices(): HasMany
     {
-        return $this->hasMany(\Eclipse\Catalogue\Models\Product\Price::class);
+        return $this->hasMany(Price::class);
     }
 
     public function getAvailableFromDateAttribute()

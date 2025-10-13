@@ -4,11 +4,12 @@ namespace Eclipse\Catalogue\Filament\Resources\ProductResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\ProductResource;
 use Eclipse\Common\Foundation\Pages\HasScoutSearch;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\ListRecords\Concerns\Translatable;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\View\View;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\ListRecords\Concerns\Translatable;
 
 class ListProducts extends ListRecords
 {
@@ -16,13 +17,13 @@ class ListProducts extends ListRecords
 
     protected static string $resource = ProductResource::class;
 
-    protected ?string $maxContentWidth = MaxWidth::Full->value;
+    protected Width|string|null $maxContentWidth = Width::Full->value;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(),
-            Actions\CreateAction::make(),
+            LocaleSwitcher::make(),
+            CreateAction::make(),
         ];
     }
 

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use InvalidArgumentException;
 use Spatie\Translatable\HasTranslations;
 
 class Property extends Model
@@ -100,7 +101,7 @@ class Property extends Model
         if ($this->type && ! empty(trim($this->type))) {
             $validTypes = [PropertyType::LIST->value, PropertyType::COLOR->value, PropertyType::CUSTOM->value];
             if (! in_array($this->type, $validTypes)) {
-                throw new \InvalidArgumentException("Invalid type '{$this->type}'. Must be one of: ".implode(', ', $validTypes));
+                throw new InvalidArgumentException("Invalid type '{$this->type}'. Must be one of: ".implode(', ', $validTypes));
             }
         }
 
@@ -116,7 +117,7 @@ class Property extends Model
             ];
 
             if (! in_array($this->input_type, $validInputTypes)) {
-                throw new \InvalidArgumentException("Invalid input_type '{$this->input_type}'. Must be one of: ".implode(', ', $validInputTypes));
+                throw new InvalidArgumentException("Invalid input_type '{$this->input_type}'. Must be one of: ".implode(', ', $validInputTypes));
             }
         }
     }

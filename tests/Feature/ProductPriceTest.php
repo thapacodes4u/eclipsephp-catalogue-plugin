@@ -5,8 +5,10 @@ use Eclipse\Catalogue\Models\Product;
 use Eclipse\Catalogue\Models\Product\Price as ProductPrice;
 use Eclipse\World\Models\Currency;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Currency::create(['id' => 'USD', 'name' => 'US Dollar', 'is_active' => true]);
@@ -42,7 +44,7 @@ test('can create a product price', function () {
     expect($price)->toBeInstanceOf(ProductPrice::class);
     expect($price->price)->toBeFloat();
     expect($price->tax_included)->toBeTrue();
-    expect($price->valid_from)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+    expect($price->valid_from)->toBeInstanceOf(Carbon::class);
     expect($price->valid_to)->toBeNull();
 });
 

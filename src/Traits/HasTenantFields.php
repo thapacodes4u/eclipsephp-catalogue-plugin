@@ -2,6 +2,8 @@
 
 namespace Eclipse\Catalogue\Traits;
 
+use Filament\Facades\Filament;
+
 trait HasTenantFields
 {
     /**
@@ -17,6 +19,6 @@ trait HasTenantFields
      */
     protected function getCurrentTenantId(): ?int
     {
-        return \Filament\Facades\Filament::getTenant()?->id;
+        return Filament::getTenant()?->id;
     }
 }

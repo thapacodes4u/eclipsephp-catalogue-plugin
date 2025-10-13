@@ -8,12 +8,13 @@ use Eclipse\Catalogue\Traits\HasProductTypeForm;
 use Eclipse\Catalogue\Traits\HasTenantFields;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\LocaleSwitcher;
 use Filament\Actions\RestoreAction;
-use Filament\Forms\Form;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Resources\Pages\EditRecord\Concerns\Translatable;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable;
 
 class EditProductType extends EditRecord
 {
@@ -41,9 +42,9 @@ class EditProductType extends EditRecord
         ];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema($this->buildProductTypeFormSchema());
+        return $schema->components($this->buildProductTypeFormSchema());
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -77,7 +78,7 @@ class EditProductType extends EditRecord
         $data['tenant_data'] = $tenantData;
 
         // Set the selected tenant to current tenant so the form shows properly
-        $currentTenant = \Filament\Facades\Filament::getTenant();
+        $currentTenant = Filament::getTenant();
         $data['selected_tenant'] = $currentTenant?->id;
 
         return $data;

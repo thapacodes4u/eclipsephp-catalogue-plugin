@@ -7,8 +7,8 @@ use Eclipse\Catalogue\Models\PriceList;
 use Eclipse\Catalogue\Traits\HandlesTenantData;
 use Eclipse\Catalogue\Traits\HasPriceListForm;
 use Eclipse\Catalogue\Traits\HasTenantFields;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
 class CreatePriceList extends CreateRecord
@@ -27,9 +27,9 @@ class CreatePriceList extends CreateRecord
 
     protected static string $resource = PriceListResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema($this->buildPriceListFormSchema());
+        return $schema->components($this->buildPriceListFormSchema());
     }
 
     protected function handleRecordCreation(array $data): Model

@@ -1,12 +1,13 @@
 <?php
 
 use Eclipse\Catalogue\Models\ProductStatus;
+use Illuminate\Database\QueryException;
 use Workbench\App\Models\Site;
 
 beforeEach(function () {
     $this->migrate();
     $this->setUpSuperAdminAndTenant();
-    $this->site = \Workbench\App\Models\Site::first();
+    $this->site = Site::first();
 });
 
 it('enforces unique code per site', function () {
@@ -30,7 +31,7 @@ it('enforces unique code per site', function () {
             'priority' => 2,
             'sd_item_availability' => 'InStock',
         ]);
-    })->toThrow(\Illuminate\Database\QueryException::class);
+    })->toThrow(QueryException::class);
 });
 
 it('allows same code for different sites', function () {

@@ -1,7 +1,9 @@
 <?php
 
+use Eclipse\Catalogue\Models\Product;
 use Eclipse\Catalogue\Models\Property;
 use Eclipse\Catalogue\Models\PropertyValue;
+use Illuminate\Database\QueryException;
 
 beforeEach(function () {
     $this->migrate();
@@ -20,7 +22,7 @@ it('validates property code uniqueness', function () {
             'enable_sorting' => false,
             'is_filter' => false,
         ]);
-    })->toThrow(\Illuminate\Database\QueryException::class);
+    })->toThrow(QueryException::class);
 });
 
 it('allows null property codes', function () {
@@ -68,7 +70,7 @@ it('requires property name', function () {
             'enable_sorting' => false,
             'is_filter' => false,
         ]);
-    })->toThrow(\Illuminate\Database\QueryException::class);
+    })->toThrow(QueryException::class);
 });
 
 it('validates property value belongs to property', function () {
@@ -83,7 +85,7 @@ it('validates property value belongs to property', function () {
 });
 
 it('validates unique product property value assignment', function () {
-    $product = \Eclipse\Catalogue\Models\Product::factory()->create();
+    $product = Product::factory()->create();
     $property = Property::factory()->create();
     $value = PropertyValue::factory()->create(['property_id' => $property->id]);
 
@@ -94,7 +96,7 @@ it('validates unique product property value assignment', function () {
     // Duplicate assignment should be prevented by unique constraint
     expect(function () use ($product, $value) {
         $product->propertyValues()->attach($value->id);
-    })->toThrow(\Illuminate\Database\QueryException::class);
+    })->toThrow(QueryException::class);
 });
 
 it('validates property value sort order is numeric', function () {

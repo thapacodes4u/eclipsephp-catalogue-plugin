@@ -2,21 +2,24 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Eclipse\Catalogue\Filament\Resources\GroupResource\Pages;
+use Eclipse\Catalogue\Filament\Resources\GroupResource\Pages\CreateGroup;
+use Eclipse\Catalogue\Filament\Resources\GroupResource\Pages\EditGroup;
+use Eclipse\Catalogue\Filament\Resources\GroupResource\Pages\ListGroups;
+use Eclipse\Catalogue\Filament\Resources\GroupResource\RelationManagers\ProductsRelationManager;
 use Eclipse\Catalogue\Models\Group;
 use Eclipse\Common\Foundation\Models\Scopes\ActiveScope;
-use Filament\Forms\Components\Section;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
@@ -24,22 +27,22 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class GroupResource extends Resource implements HasShieldPermissions
+class GroupResource extends Resource
 {
     protected static ?string $model = Group::class;
 
     protected static ?string $slug = 'groups';
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Group Information')
                     ->schema([
                         TextInput::make('name')
@@ -50,7 +53,7 @@ class GroupResource extends Resource implements HasShieldPermissions
                             ->required()
                             ->maxLength(50)
                             ->unique(ignoreRecord: true, modifyRuleUsing: function ($rule) {
-                                $currentTenant = \Filament\Facades\Filament::getTenant();
+                                $currentTenant = Filament::getTenant();
                                 $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
                                 if ($currentTenant) {
                                     return $rule->where($tenantFK, $currentTenant->id);
@@ -117,7 +120,7 @@ class GroupResource extends Resource implements HasShieldPermissions
                 TernaryFilter::make('is_browsable')
                     ->label('Browsable'),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
                     DeleteAction::make(),
@@ -128,7 +131,7 @@ class GroupResource extends Resource implements HasShieldPermissions
                     ->color('gray')
                     ->button(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
@@ -138,9 +141,9 @@ class GroupResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListGroups::route('/'),
-            'create' => Pages\CreateGroup::route('/create'),
-            'edit' => Pages\EditGroup::route('/{record}/edit'),
+            'index' => ListGroups::route('/'),
+            'create' => CreateGroup::route('/create'),
+            'edit' => EditGroup::route('/{record}/edit'),
         ];
     }
 
@@ -148,7 +151,7 @@ class GroupResource extends Resource implements HasShieldPermissions
     {
         return [
             RelationGroup::make('Products', [
-                \Eclipse\Catalogue\Filament\Resources\GroupResource\RelationManagers\ProductsRelationManager::class,
+                ProductsRelationManager::class,
             ]),
         ];
     }
@@ -158,7 +161,7 @@ class GroupResource extends Resource implements HasShieldPermissions
         $query = parent::getEloquentQuery()
             ->withoutGlobalScope(ActiveScope::class);
 
-        $currentTenant = \Filament\Facades\Filament::getTenant();
+        $currentTenant = Filament::getTenant();
         if ($currentTenant) {
             $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
             $query->where($tenantFK, $currentTenant->id);
@@ -180,17 +183,5 @@ class GroupResource extends Resource implements HasShieldPermissions
         return array_filter([
             'Code' => $record->code,
         ]);
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'delete',
-            'delete_any',
-        ];
     }
 }

@@ -3,8 +3,8 @@
 namespace Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\CategoryResource;
-use Filament\Actions;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use SolutionForest\FilamentTree\Concern\TreeRecords\Translatable;
 use SolutionForest\FilamentTree\Resources\Pages\TreePage as BasePage;
 
@@ -24,7 +24,7 @@ class SortingCategory extends BasePage
     protected function getActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(),
+            LocaleSwitcher::make(),
             $this->getCreateAction()
                 ->translateLabel()
                 ->label(__('eclipse-catalogue::categories.actions.create'))

@@ -1,7 +1,10 @@
 <?php
 
+use Eclipse\Catalogue\Filament\Resources\ProductTypeResource;
 use Eclipse\Catalogue\Models\ProductType;
 use Eclipse\Catalogue\Models\ProductTypeData;
+use Eclipse\Core\Models\Locale;
+use Illuminate\Support\Carbon;
 use Workbench\App\Models\Site;
 
 /**
@@ -24,7 +27,7 @@ function createTypeData(array $attributes): ProductTypeData
 test('guest cannot access product type resource index', function () {
     auth()->logout();
 
-    $this->get(\Eclipse\Catalogue\Filament\Resources\ProductTypeResource::getUrl())
+    $this->get(ProductTypeResource::getUrl())
         ->assertRedirect(); // Should redirect to login
 });
 
@@ -116,7 +119,7 @@ test('factory creates valid product types', function () {
 
     expect($type->getTranslation('name', 'en'))->toBeString();
     expect($type->code)->toBeString();
-    expect($type->created_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+    expect($type->created_at)->toBeInstanceOf(Carbon::class);
 });
 
 // Default Type Tests
@@ -254,8 +257,8 @@ test('name translations are properly cast', function () {
     expect($translations)->toHaveKey('en');
 
     // Should have translations for all available locales
-    if (class_exists(\Eclipse\Core\Models\Locale::class)) {
-        $availableLocales = \Eclipse\Core\Models\Locale::getAvailableLocales()
+    if (class_exists(Locale::class)) {
+        $availableLocales = Locale::getAvailableLocales()
             ->pluck('id')
             ->toArray();
 

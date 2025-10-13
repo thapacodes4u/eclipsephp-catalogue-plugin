@@ -8,14 +8,17 @@ use Eclipse\Catalogue\Models\PriceList;
 use Eclipse\Catalogue\Models\ProductStatus;
 use Eclipse\Catalogue\Models\ProductType;
 use Eclipse\Catalogue\Services\ProductBulkUpdater;
+use Filament\Actions\BulkAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Facades\App;
 
 class BulkUpdateProductsAction extends BulkAction
@@ -39,7 +42,7 @@ class BulkUpdateProductsAction extends BulkAction
                     ->options(function () {
                         $query = ProductStatus::query();
                         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                        $currentTenant = Filament::getTenant();
 
                         if ($tenantFK && $currentTenant) {
                             $query->where($tenantFK, $currentTenant->id);
@@ -62,7 +65,7 @@ class BulkUpdateProductsAction extends BulkAction
                     ->label('Product Type')
                     ->options(function () {
                         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                        $currentTenant = Filament::getTenant();
 
                         $query = ProductType::query();
 
@@ -103,7 +106,7 @@ class BulkUpdateProductsAction extends BulkAction
                     ->label('Category')
                     ->options(function () {
                         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                        $currentTenant = Filament::getTenant();
                         $query = Category::query()->withoutGlobalScopes();
                         if ($tenantFK && $currentTenant) {
                             $query->where($tenantFK, $currentTenant->id);
@@ -120,7 +123,7 @@ class BulkUpdateProductsAction extends BulkAction
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        \Filament\Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
                                 Select::make('groups_add_ids')
                                     ->label('Add to groups')
@@ -142,7 +145,7 @@ class BulkUpdateProductsAction extends BulkAction
                             ->label(__('eclipse-catalogue::product.price.fields.price_list'))
                             ->options(function () {
                                 $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-                                $currentTenant = \Filament\Facades\Filament::getTenant();
+                                $currentTenant = Filament::getTenant();
 
                                 $query = PriceList::query();
                                 if ($tenantFK && $currentTenant) {
@@ -161,7 +164,7 @@ class BulkUpdateProductsAction extends BulkAction
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->afterStateUpdated(function ($state, \Filament\Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, Set $set) {
                                 if (! $state) {
                                     return;
                                 }
@@ -172,9 +175,9 @@ class BulkUpdateProductsAction extends BulkAction
                             })
                             ->columnSpanFull(),
 
-                        \Filament\Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                \Filament\Forms\Components\Group::make()
+                                \Filament\Schemas\Components\Group::make()
                                     ->schema([
                                         TextInput::make('price')
                                             ->label(__('eclipse-catalogue::product.price.fields.price'))
@@ -185,7 +188,7 @@ class BulkUpdateProductsAction extends BulkAction
                                             ->inline(false)
                                             ->default(false),
                                     ]),
-                                \Filament\Forms\Components\Group::make()
+                                \Filament\Schemas\Components\Group::make()
                                     ->schema([
                                         DatePicker::make('valid_from')
                                             ->label(__('eclipse-catalogue::product.price.fields.valid_from'))
@@ -202,9 +205,9 @@ class BulkUpdateProductsAction extends BulkAction
                     ->collapsible()
                     ->collapsed()
                     ->schema([
-                        \Filament\Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                \Filament\Forms\Components\Group::make()
+                                \Filament\Schemas\Components\Group::make()
                                     ->schema([
                                         FileUpload::make('cover_image')
                                             ->label('Cover image')
@@ -225,7 +228,7 @@ class BulkUpdateProductsAction extends BulkAction
                                             ->preserveFilenames()
                                             ->nullable(),
                                     ]),
-                                \Filament\Forms\Components\Group::make()
+                                \Filament\Schemas\Components\Group::make()
                                     ->schema([
                                         FileUpload::make('image_1')
                                             ->label('Image #1')

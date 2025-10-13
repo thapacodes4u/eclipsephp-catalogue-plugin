@@ -18,6 +18,11 @@ abstract class TestCase extends BaseTestCase
 
     protected ?Site $site = null;
 
+    protected function getEnvironmentSetUp($app): void
+    {
+        $app['config']->set('filament-shield.register_role_policy', false);
+    }
+
     protected function setUp(): void
     {
         // Always show errors when testing
@@ -56,8 +61,16 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUpSuperAdmin(): self
     {
-        $this->superAdmin = User::factory()->make();
-        $this->superAdmin->assignRole('super_admin')->save();
+        $this->superAdmin = User::factory()->create();
+
+        // Assign super admin role and give all permissions
+        $superAdminRole = \Spatie\Permission\Models\Role::where('name', 'super_admin')->first();
+        if ($superAdminRole) {
+            $this->superAdmin->assignRole($superAdminRole);
+            // Give all permissions to super admin role
+            $permissions = \Spatie\Permission\Models\Permission::all();
+            $superAdminRole->syncPermissions($permissions);
+        }
 
         $this->actingAs($this->superAdmin);
 
@@ -88,6 +101,68 @@ abstract class TestCase extends BaseTestCase
         $this->user = User::factory()->create();
 
         $this->actingAs($this->user);
+
+        return $this;
+    }
+
+    /**
+     * Create permissions for all resources
+     */
+    protected function createPermissions(): self
+    {
+        $resources = [
+            'category',
+            'group',
+            'measure_unit',
+            'price_list',
+            'product',
+            'product_status',
+            'product_type',
+            'property',
+            'property_value',
+            'role',
+            'tax_class',
+        ];
+
+        $permissions = [
+            'view_any',
+            'view',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+
+        foreach ($resources as $resource) {
+            foreach ($permissions as $permission) {
+                \Spatie\Permission\Models\Permission::firstOrCreate([
+                    'name' => $permission.'_'.$resource,
+                    'guard_name' => 'web',
+                ]);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Create roles
+     */
+    protected function createRoles(): self
+    {
+        \Spatie\Permission\Models\Role::firstOrCreate([
+            'name' => 'super_admin',
+            'guard_name' => 'web',
+        ]);
+
+        \Spatie\Permission\Models\Role::firstOrCreate([
+            'name' => 'panel_user',
+            'guard_name' => 'web',
+        ]);
 
         return $this;
     }

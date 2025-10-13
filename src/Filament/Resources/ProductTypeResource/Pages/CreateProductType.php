@@ -7,11 +7,11 @@ use Eclipse\Catalogue\Models\ProductType;
 use Eclipse\Catalogue\Traits\HandlesTenantData;
 use Eclipse\Catalogue\Traits\HasProductTypeForm;
 use Eclipse\Catalogue\Traits\HasTenantFields;
-use Filament\Actions\LocaleSwitcher;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\CreateRecord\Concerns\Translatable;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\CreateRecord\Concerns\Translatable;
 
 class CreateProductType extends CreateRecord
 {
@@ -36,9 +36,9 @@ class CreateProductType extends CreateRecord
         return [];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema($this->buildProductTypeFormSchema());
+        return $schema->components($this->buildProductTypeFormSchema());
     }
 
     protected function handleRecordCreation(array $data): Model

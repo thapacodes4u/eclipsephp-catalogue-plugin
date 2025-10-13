@@ -2,6 +2,8 @@
 
 namespace Eclipse\Catalogue\Filament\Resources\Concerns;
 
+use Exception;
+
 trait HandlesImageUploads
 {
     public ?array $temporaryImages = null;
@@ -50,7 +52,7 @@ trait HandlesImageUploads
                                 'position' => $index,
                             ])
                             ->toMediaCollection('images');
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                     }
                 }
             }

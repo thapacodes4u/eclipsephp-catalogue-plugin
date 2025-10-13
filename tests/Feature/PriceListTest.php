@@ -1,5 +1,6 @@
 <?php
 
+use Eclipse\Catalogue\Filament\Resources\PriceListResource;
 use Eclipse\Catalogue\Models\PriceList;
 use Eclipse\Catalogue\Models\PriceListData;
 use Eclipse\World\Models\Currency;
@@ -41,7 +42,7 @@ test('unauthenticated users cannot access price list index', function () {
     // Clear any authenticated user
     auth()->logout();
 
-    $this->get(\Eclipse\Catalogue\Filament\Resources\PriceListResource::getUrl())
+    $this->get(PriceListResource::getUrl())
         ->assertRedirect(); // Should redirect to login
 });
 

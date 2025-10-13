@@ -2,11 +2,16 @@
 
 namespace Eclipse\Catalogue\Services;
 
+use Carbon\Carbon;
 use Eclipse\Catalogue\Models\Group;
 use Eclipse\Catalogue\Models\Product\Price as ProductPrice;
+use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
 
 class ProductBulkUpdater
 {
@@ -90,12 +95,12 @@ class ProductBulkUpdater
                             }
                             if (is_string($fileValue)) {
                                 if (! Storage::disk('public')->exists($fileValue)) {
-                                    throw new \RuntimeException('Temp image not found on public disk: '.$fileValue);
+                                    throw new RuntimeException('Temp image not found on public disk: '.$fileValue);
                                 }
 
                                 return $product->addMediaFromDisk($fileValue, 'public');
                             }
-                            if ($fileValue instanceof \Illuminate\Http\UploadedFile) {
+                            if ($fileValue instanceof UploadedFile) {
                                 return $product->addMedia($fileValue->getRealPath());
                             }
 
@@ -137,7 +142,7 @@ class ProductBulkUpdater
 
                     if ($shouldUpdateCategories) {
                         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                        $currentTenant = Filament::getTenant();
                         if ($tenantFK && $currentTenant) {
                             $existing = $product->productData()->where($tenantFK, $currentTenant->id)->first();
                             $currentCategoryId = $existing?->category_id;
@@ -163,7 +168,7 @@ class ProductBulkUpdater
 
                     if ($shouldUpdateFreeDelivery) {
                         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                        $currentTenant = Filament::getTenant();
                         if ($tenantFK && $currentTenant) {
                             $existing = $product->productData()->where($tenantFK, $currentTenant->id)->first();
                             $currentFlag = (bool) ($existing?->has_free_delivery ?? false);
@@ -179,7 +184,7 @@ class ProductBulkUpdater
 
                     if ($shouldUpdateStatus) {
                         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-                        $currentTenant = \Filament\Facades\Filament::getTenant();
+                        $currentTenant = Filament::getTenant();
                         if ($tenantFK && $currentTenant) {
                             $existing = $product->productData()->where($tenantFK, $currentTenant->id)->first();
                             $currentStatusId = $existing?->product_status_id;
@@ -199,13 +204,13 @@ class ProductBulkUpdater
                         $price = ProductPrice::query()->firstOrNew([
                             'product_id' => $product->id,
                             'price_list_id' => (int) $bulkPriceListId,
-                            'valid_from' => \Carbon\Carbon::parse($bulkValidFrom)->toDateString(),
+                            'valid_from' => Carbon::parse($bulkValidFrom)->toDateString(),
                         ]);
 
                         $original = $price->exists ? clone $price : null;
 
                         $price->price = $bulkPrice;
-                        $price->valid_to = $bulkValidTo ? \Carbon\Carbon::parse($bulkValidTo)->toDateString() : null;
+                        $price->valid_to = $bulkValidTo ? Carbon::parse($bulkValidTo)->toDateString() : null;
                         $price->tax_included = (bool) $bulkTaxIncluded;
                         $price->save();
 
@@ -220,7 +225,7 @@ class ProductBulkUpdater
                 if ($changed) {
                     $successCount++;
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $errors[] = $e->getMessage();
                 Log::error('Bulk product update failed', [
                     'product_id' => $product->id ?? null,

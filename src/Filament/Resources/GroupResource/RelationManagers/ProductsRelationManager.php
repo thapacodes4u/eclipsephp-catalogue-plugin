@@ -3,9 +3,16 @@
 namespace Eclipse\Catalogue\Filament\Resources\GroupResource\RelationManagers;
 
 use Eclipse\Catalogue\Filament\Resources\ProductResource;
-use Filament\Forms;
+use Eclipse\Catalogue\Models\Product;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -29,7 +36,7 @@ class ProductsRelationManager extends RelationManager
             ->defaultSort('pim_group_has_product.sort')
             ->reorderable('pim_group_has_product.sort')
             ->reorderRecordsTriggerAction(
-                fn (Tables\Actions\Action $action, bool $isReordering) => $action
+                fn (Action $action, bool $isReordering) => $action
                     ->button()
                     ->label($isReordering ? 'Disable reordering' : 'Enable reordering')
                     ->icon($isReordering ? 'heroicon-o-x-mark' : 'heroicon-o-arrows-up-down')
@@ -37,21 +44,21 @@ class ProductsRelationManager extends RelationManager
             )
             ->paginated(false)
             ->headerActions([
-                Tables\Actions\Action::make('add_product')
+                Action::make('add_product')
                     ->label('Add product')
                     ->icon('heroicon-o-plus')
                     ->modalHeading('Add Product to Group')
                     ->modalSubmitActionLabel('Add Product')
                     ->modalCancelActionLabel('Cancel')
-                    ->form([
-                        \Filament\Forms\Components\Select::make('product_id')
+                    ->schema([
+                        Select::make('product_id')
                             ->label('Select product')
                             ->options(function () {
                                 $group = $this->getOwnerRecord();
                                 $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-                                $currentTenant = \Filament\Facades\Filament::getTenant();
+                                $currentTenant = Filament::getTenant();
 
-                                $query = \Eclipse\Catalogue\Models\Product::query();
+                                $query = Product::query();
 
                                 if ($currentTenant) {
                                     $query->whereHas('productData', function ($q) use ($tenantFK, $currentTenant) {
@@ -70,38 +77,38 @@ class ProductsRelationManager extends RelationManager
                     ])
                     ->action(function (array $data) {
                         $group = $this->getOwnerRecord();
-                        $product = \Eclipse\Catalogue\Models\Product::find($data['product_id']);
+                        $product = Product::find($data['product_id']);
 
                         if ($product && ! $group->hasProduct($product)) {
                             $group->addProduct($product);
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Product added to group')
                                 ->success()
                                 ->send();
                         }
                     }),
             ])
-            ->actions([
-                Tables\Actions\Action::make('edit_product')
+            ->recordActions([
+                Action::make('edit_product')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil')
                     ->url(fn ($record): string => ProductResource::getUrl('edit', ['record' => $record->id]))
                     ->openUrlInNewTab(),
 
-                Tables\Actions\Action::make('move_product')
+                Action::make('move_product')
                     ->label('Reorder')
                     ->icon('heroicon-o-arrows-up-down')
                     ->modalHeading(fn ($record) => 'Reorder: '.$record->name)
                     ->modalSubmitActionLabel('Move Product')
                     ->modalCancelActionLabel('Cancel')
-                    ->form(function ($record, $livewire) {
+                    ->schema(function ($record, $livewire) {
                         return [
-                            Forms\Components\Placeholder::make('moving_info')
+                            Placeholder::make('moving_info')
                                 ->label('You are moving')
                                 ->content($record->name),
 
-                            Forms\Components\Select::make('reference_id')
+                            Select::make('reference_id')
                                 ->label('Place relative to')
                                 ->options(
                                     $livewire->getOwnerRecord()
@@ -113,7 +120,7 @@ class ProductsRelationManager extends RelationManager
                                 ->reactive()
                                 ->required(),
 
-                            Forms\Components\Radio::make('position')
+                            Radio::make('position')
                                 ->label('Position')
                                 ->options([
                                     'before' => 'Before selected product',
@@ -123,7 +130,7 @@ class ProductsRelationManager extends RelationManager
                                 ->inline()
                                 ->reactive(),
 
-                            Forms\Components\Placeholder::make('preview')
+                            Placeholder::make('preview')
                                 ->label('Result')
                                 ->content(function (callable $get, $livewire) use ($record) {
                                     $refId = $get('reference_id');
@@ -181,7 +188,7 @@ class ProductsRelationManager extends RelationManager
                         $group->updateProductSort($record, $newSort);
                     }),
 
-                Tables\Actions\Action::make('remove_product')
+                Action::make('remove_product')
                     ->label('Remove')
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
@@ -193,15 +200,15 @@ class ProductsRelationManager extends RelationManager
                         $group = $this->getOwnerRecord();
                         $group->removeProduct($record);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Product removed from group')
                             ->success()
                             ->send();
                     }),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('remove_products')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('remove_products')
                         ->label('Remove from Group')
                         ->icon('heroicon-o-x-mark')
                         ->color('danger')
@@ -220,7 +227,7 @@ class ProductsRelationManager extends RelationManager
                                 }
                             }
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title("Removed {$removedCount} products from group")
                                 ->success()
                                 ->send();

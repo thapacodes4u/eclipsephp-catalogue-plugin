@@ -2,69 +2,85 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Eclipse\Catalogue\Enums\PropertyInputType;
 use Eclipse\Catalogue\Enums\PropertyType;
-use Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages;
-use Eclipse\Catalogue\Filament\Resources\PropertyResource\RelationManagers;
+use Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages\CreateProperty;
+use Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages\EditProperty;
+use Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages\ListProperties;
+use Eclipse\Catalogue\Filament\Resources\PropertyResource\RelationManagers\ValuesRelationManager;
 use Eclipse\Catalogue\Models\ProductType;
 use Eclipse\Catalogue\Models\Property;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Concerns\Translatable;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 
-class PropertyResource extends Resource implements HasShieldPermissions
+class PropertyResource extends Resource
 {
     use Translatable;
 
     protected static ?string $model = Property::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make(__('eclipse-catalogue::property.sections.basic_information'))
+        return $schema
+            ->components([
+                Section::make(__('eclipse-catalogue::property.sections.basic_information'))
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->label(__('eclipse-catalogue::property.fields.name'))
                             ->required()
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('code')
+                        TextInput::make('code')
                             ->label(__('eclipse-catalogue::property.fields.code'))
                             ->helperText(__('eclipse-catalogue::property.help_text.code'))
                             ->regex('/^[a-zA-Z0-9_]*$/')
                             ->unique(ignoreRecord: true),
 
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->label(__('eclipse-catalogue::property.fields.description'))
                             ->rows(3),
 
-                        Forms\Components\TextInput::make('internal_name')
+                        TextInput::make('internal_name')
                             ->label(__('eclipse-catalogue::property.fields.internal_name'))
                             ->helperText(__('eclipse-catalogue::property.help_text.internal_name'))
                             ->maxLength(255),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('eclipse-catalogue::property.sections.configuration'))
+                Section::make(__('eclipse-catalogue::property.sections.configuration'))
                     ->schema([
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->label(__('eclipse-catalogue::property.fields.is_active'))
                             ->default(true),
 
-                        Forms\Components\Toggle::make('is_global')
+                        Toggle::make('is_global')
                             ->label(__('eclipse-catalogue::property.fields.is_global'))
                             ->helperText(__('eclipse-catalogue::property.help_text.is_global'))
                             ->reactive(),
 
-                        Forms\Components\Select::make('type')
+                        Select::make('type')
                             ->label('Property Type')
                             ->options(fn () => collect(PropertyType::cases())
                                 ->mapWithKeys(fn (PropertyType $e) => [$e->value => $e->getLabel()])
@@ -73,53 +89,53 @@ class PropertyResource extends Resource implements HasShieldPermissions
                             ->reactive()
                             ->required(),
 
-                        Forms\Components\Select::make('input_type')
+                        Select::make('input_type')
                             ->label('Input Type')
                             ->options(fn () => collect(PropertyInputType::cases())
                                 ->mapWithKeys(fn (PropertyInputType $e) => [$e->value => $e->getLabel()])
                                 ->toArray())
-                            ->visible(fn (Forms\Get $get) => $get('type') === PropertyType::CUSTOM->value)
-                            ->required(fn (Forms\Get $get) => $get('type') === PropertyType::CUSTOM->value)
+                            ->visible(fn (Get $get) => $get('type') === PropertyType::CUSTOM->value)
+                            ->required(fn (Get $get) => $get('type') === PropertyType::CUSTOM->value)
                             ->reactive(),
 
-                        Forms\Components\Toggle::make('is_multilang')
+                        Toggle::make('is_multilang')
                             ->label('Multilingual')
                             ->helperText('Enable translation support for string, text, and file inputs')
-                            ->visible(fn (Forms\Get $get) => $get('type') === PropertyType::CUSTOM->value && in_array($get('input_type'), [
+                            ->visible(fn (Get $get) => $get('type') === PropertyType::CUSTOM->value && in_array($get('input_type'), [
                                 PropertyInputType::STRING->value,
                                 PropertyInputType::TEXT->value,
                                 PropertyInputType::FILE->value,
                             ]))
                             ->default(false),
 
-                        Forms\Components\TextInput::make('max_values')
+                        TextInput::make('max_values')
                             ->label(__('eclipse-catalogue::property.fields.max_values'))
                             ->numeric()
                             ->minValue(1)
                             ->maxValue(10)
                             ->helperText(__('eclipse-catalogue::property.help_text.max_values'))
-                            ->visible(fn (Forms\Get $get) => $get('type') === PropertyType::LIST->value || $get('input_type') === PropertyInputType::FILE->value),
+                            ->visible(fn (Get $get) => $get('type') === PropertyType::LIST->value || $get('input_type') === PropertyInputType::FILE->value),
 
-                        Forms\Components\Toggle::make('enable_sorting')
+                        Toggle::make('enable_sorting')
                             ->label(__('eclipse-catalogue::property.fields.enable_sorting'))
                             ->helperText(__('eclipse-catalogue::property.help_text.enable_sorting'))
-                            ->visible(fn (Forms\Get $get) => $get('type') === PropertyType::LIST->value),
+                            ->visible(fn (Get $get) => $get('type') === PropertyType::LIST->value),
 
-                        Forms\Components\Toggle::make('is_filter')
+                        Toggle::make('is_filter')
                             ->label(__('eclipse-catalogue::property.fields.is_filter'))
                             ->helperText(__('eclipse-catalogue::property.help_text.is_filter')),
                     ])->columns(2),
 
-                Forms\Components\Section::make(__('eclipse-catalogue::property.sections.product_types'))
+                Section::make(__('eclipse-catalogue::property.sections.product_types'))
                     ->schema([
-                        Forms\Components\CheckboxList::make('product_types')
+                        CheckboxList::make('product_types')
                             ->label(__('eclipse-catalogue::property.fields.product_types'))
                             ->relationship('productTypes', 'name')
                             ->options(ProductType::pluck('name', 'id'))
                             ->helperText(__('eclipse-catalogue::property.help_text.product_types'))
-                            ->hidden(fn (Forms\Get $get) => $get('is_global')),
+                            ->hidden(fn (Get $get) => $get('is_global')),
                     ])
-                    ->hidden(fn (Forms\Get $get) => $get('is_global')),
+                    ->hidden(fn (Get $get) => $get('is_global')),
             ]);
     }
 
@@ -127,22 +143,22 @@ class PropertyResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('code')
+                TextColumn::make('code')
                     ->label(__('eclipse-catalogue::property.table.columns.code'))
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(__('eclipse-catalogue::property.table.columns.name'))
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('internal_name')
+                TextColumn::make('internal_name')
                     ->label(__('eclipse-catalogue::property.table.columns.internal_name'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label('Type')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -152,55 +168,55 @@ class PropertyResource extends Resource implements HasShieldPermissions
                         default => 'gray',
                     }),
 
-                Tables\Columns\TextColumn::make('input_type')
+                TextColumn::make('input_type')
                     ->label('Input Type')
                     ->visible(fn (?Property $record) => $record && $record->isCustomType())
                     ->badge()
                     ->color('info'),
 
-                Tables\Columns\IconColumn::make('is_multilang')
+                IconColumn::make('is_multilang')
                     ->label('Multilingual')
                     ->boolean()
                     ->state(fn (?Property $record) => $record?->supportsMultilang())
                     ->visible(fn (?Property $record) => $record && $record->supportsMultilang()),
 
-                Tables\Columns\IconColumn::make('is_global')
+                IconColumn::make('is_global')
                     ->label(__('eclipse-catalogue::property.table.columns.is_global'))
                     ->boolean(),
 
-                Tables\Columns\TextColumn::make('max_values')
+                TextColumn::make('max_values')
                     ->label(__('eclipse-catalogue::property.table.columns.max_values'))
                     ->numeric(),
 
-                Tables\Columns\IconColumn::make('enable_sorting')
+                IconColumn::make('enable_sorting')
                     ->label(__('eclipse-catalogue::property.table.columns.enable_sorting'))
                     ->boolean(),
 
-                Tables\Columns\IconColumn::make('is_filter')
+                IconColumn::make('is_filter')
                     ->label(__('eclipse-catalogue::property.table.columns.is_filter'))
                     ->boolean(),
 
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label(__('eclipse-catalogue::property.table.columns.is_active'))
                     ->boolean(),
 
-                Tables\Columns\TextColumn::make('values_count')
+                TextColumn::make('values_count')
                     ->label(__('eclipse-catalogue::property.table.columns.values_count'))
                     ->counts('values'),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('eclipse-catalogue::property.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('product_type')
+                SelectFilter::make('product_type')
                     ->label(__('eclipse-catalogue::property.table.filters.product_type'))
                     ->relationship('productTypes', 'name')
                     ->multiple(),
 
-                Tables\Filters\SelectFilter::make('type')
+                SelectFilter::make('type')
                     ->label('Property Type')
                     ->options([
                         PropertyType::LIST->value => PropertyType::LIST->getLabel(),
@@ -208,29 +224,29 @@ class PropertyResource extends Resource implements HasShieldPermissions
                         PropertyType::CUSTOM->value => PropertyType::CUSTOM->getLabel(),
                     ]),
 
-                Tables\Filters\TernaryFilter::make('is_global')
+                TernaryFilter::make('is_global')
                     ->label(__('eclipse-catalogue::property.table.filters.is_global')),
 
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->label(__('eclipse-catalogue::property.table.filters.is_active')),
 
-                Tables\Filters\TernaryFilter::make('is_filter')
+                TernaryFilter::make('is_filter')
                     ->label(__('eclipse-catalogue::property.table.filters.is_filter')),
             ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('values')
+            ->recordActions([
+                ActionGroup::make([
+                    Action::make('values')
                         ->label(__('eclipse-catalogue::property.table.actions.values'))
                         ->icon('heroicon-o-list-bullet')
                         ->url(fn (Property $record): string => PropertyValueResource::getUrl('index', ['property' => $record->id]))
                         ->visible(fn (Property $record): bool => in_array($record->type, [PropertyType::LIST->value, PropertyType::COLOR->value], true)),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
                 ])->label('Actions'),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->recordUrl(fn (Property $record): ?string => in_array($record->type, [PropertyType::LIST->value, PropertyType::COLOR->value], true) ? PropertyValueResource::getUrl('index', ['property' => $record->id]) : null)
@@ -240,32 +256,16 @@ class PropertyResource extends Resource implements HasShieldPermissions
     public static function getRelations(): array
     {
         return [
-            RelationManagers\ValuesRelationManager::class,
+            ValuesRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProperties::route('/'),
-            'create' => Pages\CreateProperty::route('/create'),
-            'edit' => Pages\EditProperty::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-            'restore',
-            'restore_any',
+            'index' => ListProperties::route('/'),
+            'create' => CreateProperty::route('/create'),
+            'edit' => EditProperty::route('/{record}/edit'),
         ];
     }
 }

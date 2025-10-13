@@ -5,6 +5,7 @@ use Eclipse\Catalogue\Jobs\ImportColorValues;
 use Eclipse\Catalogue\Models\Property;
 use Eclipse\Catalogue\Models\PropertyValue;
 use Eclipse\Catalogue\Values\Background;
+use Eclipse\Common\Enums\JobStatus;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -131,7 +132,7 @@ it('shows correct counts in notification after import', function () {
     // Set job status to completed to get notification body
     $statusProperty = $reflection->getProperty('status');
     $statusProperty->setAccessible(true);
-    $statusProperty->setValue($job, \Eclipse\Common\Enums\JobStatus::COMPLETED);
+    $statusProperty->setValue($job, JobStatus::COMPLETED);
 
     // Access protected method via reflection
     $method = $reflection->getMethod('getNotificationBody');

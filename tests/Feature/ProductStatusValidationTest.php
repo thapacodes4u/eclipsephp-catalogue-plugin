@@ -1,11 +1,12 @@
 <?php
 
 use Eclipse\Catalogue\Models\ProductStatus;
+use Workbench\App\Models\Site;
 
 beforeEach(function () {
     $this->migrate();
     $this->setUpSuperAdminAndTenant();
-    $this->site = \Workbench\App\Models\Site::first();
+    $this->site = Site::first();
 });
 
 it('enforces allow_sale false when allow_price_display is false', function () {
@@ -54,7 +55,7 @@ it('validates required fields', function () {
             'site_id' => $this->site->id,
             // Missing required fields: code, title, label_type, priority, sd_item_availability
         ]);
-    })->toThrow(\Exception::class);
+    })->toThrow(Exception::class);
 });
 
 it('validates code length limit', function () {
@@ -67,5 +68,5 @@ it('validates code length limit', function () {
             'priority' => 1,
             'sd_item_availability' => 'InStock',
         ]);
-    })->toThrow(\Exception::class);
+    })->toThrow(Exception::class);
 });

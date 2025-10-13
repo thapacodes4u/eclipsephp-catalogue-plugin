@@ -95,7 +95,7 @@ class TaxClass extends Model
 
         // Add tenant scope if tenancy is configured
         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-        $currentTenantId = $tenantId ?: \Filament\Facades\Filament::getTenant()?->id;
+        $currentTenantId = $tenantId ?: Filament::getTenant()?->id;
         if ($tenantFK && $currentTenantId) {
             $query->where($tenantFK, $currentTenantId);
         }

@@ -1,6 +1,7 @@
 <?php
 
 use Eclipse\Catalogue\Models\Group;
+use Illuminate\Database\QueryException;
 
 beforeEach(function () {
     $this->migrate();
@@ -55,7 +56,7 @@ it('prevents duplicate code within the same site', function () {
         'code' => 'unique-code',
         'name' => 'Second Group',
         'is_active' => true,
-    ]))->toThrow(\Illuminate\Database\QueryException::class);
+    ]))->toThrow(QueryException::class);
 });
 
 it('allows updating group with same code on same site', function () {

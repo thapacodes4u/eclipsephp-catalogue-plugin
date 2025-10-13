@@ -4,26 +4,30 @@ namespace Eclipse\Catalogue\Filament\Resources\ProductResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\Concerns\HandlesImageUploads;
 use Eclipse\Catalogue\Filament\Resources\ProductResource;
+use Eclipse\Catalogue\Models\Group;
 use Eclipse\Catalogue\Models\Product;
+use Eclipse\Catalogue\Models\ProductStatus;
+use Eclipse\Catalogue\Models\Property;
 use Eclipse\Catalogue\Traits\HandlesTenantData;
 use Eclipse\Catalogue\Traits\HasTenantFields;
-use Filament\Actions;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\CreateRecord\Concerns\Translatable;
 
 class CreateProduct extends CreateRecord
 {
-    use CreateRecord\Concerns\Translatable;
     use HandlesImageUploads;
     use HandlesTenantData, HasTenantFields;
+    use Translatable;
 
     protected static string $resource = ProductResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\LocaleSwitcher::make(),
+            LocaleSwitcher::make(),
         ];
     }
 
@@ -48,9 +52,9 @@ class CreateProduct extends CreateRecord
         return [];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form;
+        return $schema;
     }
 
     protected function handleRecordCreation(array $data): Model
@@ -60,7 +64,7 @@ class CreateProduct extends CreateRecord
         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
         if (! $tenantFK) {
             if (empty($tenantData['product_status_id'] ?? null)) {
-                $default = \Eclipse\Catalogue\Models\ProductStatus::query()->where('is_default', true)->orderBy('priority')->first();
+                $default = ProductStatus::query()->where('is_default', true)->orderBy('priority')->first();
                 if ($default) {
                     $tenantData['product_status_id'] = $default->id;
                 }
@@ -68,7 +72,7 @@ class CreateProduct extends CreateRecord
         } else {
             foreach ($tenantData as $siteId => &$td) {
                 if (empty($td['product_status_id'] ?? null)) {
-                    $default = \Eclipse\Catalogue\Models\ProductStatus::query()->where($tenantFK, $siteId)->where('is_default', true)->orderBy('priority')->first();
+                    $default = ProductStatus::query()->where($tenantFK, $siteId)->where('is_default', true)->orderBy('priority')->first();
                     if ($default) {
                         $td['product_status_id'] = $default->id;
                     }
@@ -124,7 +128,7 @@ class CreateProduct extends CreateRecord
         }
 
         foreach ($customPropertyData as $propertyId => $value) {
-            $property = \Eclipse\Catalogue\Models\Property::find($propertyId);
+            $property = Property::find($propertyId);
             if ($property && $property->isCustomType()) {
                 if ($property->supportsMultilang() && is_array($value)) {
                     $filteredValue = array_filter($value, fn ($v) => $v !== null && $v !== '');
@@ -143,7 +147,7 @@ class CreateProduct extends CreateRecord
             foreach ($tenantData as $tenantId => $data) {
                 $groupIds = array_filter(array_map('intval', (array) ($data['groups'] ?? [])));
                 foreach ($groupIds as $groupId) {
-                    $group = \Eclipse\Catalogue\Models\Group::find($groupId);
+                    $group = Group::find($groupId);
                     $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
                     if ($group && (int) $group->getAttribute($tenantFK) === (int) $tenantId) {
                         $group->addProduct($product);
@@ -164,7 +168,7 @@ class CreateProduct extends CreateRecord
             }
 
             foreach ($flatGroupIds as $groupId) {
-                if ($group = \Eclipse\Catalogue\Models\Group::find($groupId)) {
+                if ($group = Group::find($groupId)) {
                     $group->addProduct($product);
                 }
             }

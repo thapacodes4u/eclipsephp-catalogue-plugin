@@ -3,9 +3,9 @@
 namespace Eclipse\Catalogue\Filament\Resources\PropertyResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\PropertyResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\ListRecords\Concerns\Translatable;
+use LaraZeus\SpatieTranslatable\Resources\Pages\ListRecords\Concerns\Translatable;
 
 class ListProperties extends ListRecords
 {
@@ -16,7 +16,7 @@ class ListProperties extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

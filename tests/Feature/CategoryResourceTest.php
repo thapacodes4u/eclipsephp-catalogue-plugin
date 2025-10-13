@@ -1,6 +1,8 @@
 <?php
 
 use Eclipse\Catalogue\Filament\Resources\CategoryResource;
+use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages\CreateCategory;
+use Eclipse\Catalogue\Filament\Resources\CategoryResource\Pages\EditCategory;
 use Eclipse\Catalogue\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -19,7 +21,7 @@ it('can render category index page', function (): void {
 it('can create category', function (): void {
     $factoryData = Category::factory()->definition();
 
-    Livewire::test(CategoryResource\Pages\CreateCategory::class)
+    Livewire::test(CreateCategory::class)
         ->fillForm([
             'name' => $factoryData['name']['en'],
             'sef_key' => $factoryData['sef_key']['en'],
@@ -39,7 +41,7 @@ it('can create category', function (): void {
 it('can edit category', function (): void {
     $category = Category::factory()->create();
 
-    Livewire::test(CategoryResource\Pages\EditCategory::class, [
+    Livewire::test(EditCategory::class, [
         'record' => $category->getRouteKey(),
     ])
         ->fillForm([
@@ -57,7 +59,7 @@ it('can edit category', function (): void {
 it('can delete category', function (): void {
     $category = Category::factory()->create();
 
-    Livewire::test(CategoryResource\Pages\EditCategory::class, [
+    Livewire::test(EditCategory::class, [
         'record' => $category->getRouteKey(),
     ])
         ->callAction('delete');
@@ -70,7 +72,7 @@ it('validates unique sef_key within same site', function (): void {
         'sef_key' => 'electronics',
     ]);
 
-    Livewire::test(CategoryResource\Pages\CreateCategory::class)
+    Livewire::test(CreateCategory::class)
         ->fillForm([
             'name' => 'New Category',
             'sef_key' => 'electronics',
@@ -86,7 +88,7 @@ it('prevents circular parent relationship', function (): void {
         'parent_id' => $parent->id,
     ]);
 
-    Livewire::test(CategoryResource\Pages\EditCategory::class, [
+    Livewire::test(EditCategory::class, [
         'record' => $parent->getRouteKey(),
     ])
         ->fillForm([

@@ -2,20 +2,21 @@
 
 namespace Eclipse\Catalogue\Filament\Resources;
 
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-use Eclipse\Catalogue\Filament\Resources\TaxClassResource\Pages;
+use Eclipse\Catalogue\Filament\Resources\TaxClassResource\Pages\CreateTaxClass;
+use Eclipse\Catalogue\Filament\Resources\TaxClassResource\Pages\EditTaxClass;
+use Eclipse\Catalogue\Filament\Resources\TaxClassResource\Pages\ListTaxClasses;
 use Eclipse\Catalogue\Models\TaxClass;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\RestoreAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -23,15 +24,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class TaxClassResource extends Resource implements HasShieldPermissions
+class TaxClassResource extends Resource
 {
     protected static ?string $model = TaxClass::class;
 
     protected static ?string $slug = 'tax-classes';
 
-    protected static ?string $navigationIcon = 'heroicon-o-calculator';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calculator';
 
-    protected static ?string $navigationGroup = 'Catalogue';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -49,10 +50,10 @@ class TaxClassResource extends Resource implements HasShieldPermissions
         return __('eclipse-catalogue::tax-class.plural');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label(__('eclipse-catalogue::tax-class.fields.name'))
                     ->required()
@@ -139,7 +140,7 @@ class TaxClassResource extends Resource implements HasShieldPermissions
             ->filters([
                 TrashedFilter::make(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
                 RestoreAction::make(),
@@ -150,9 +151,9 @@ class TaxClassResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTaxClasses::route('/'),
-            'create' => Pages\CreateTaxClass::route('/create'),
-            'edit' => Pages\EditTaxClass::route('/{record}/edit'),
+            'index' => ListTaxClasses::route('/'),
+            'create' => CreateTaxClass::route('/create'),
+            'edit' => EditTaxClass::route('/{record}/edit'),
         ];
     }
 
@@ -162,21 +163,5 @@ class TaxClassResource extends Resource implements HasShieldPermissions
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view_any',
-            'view',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-        ];
     }
 }

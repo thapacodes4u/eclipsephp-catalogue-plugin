@@ -1,6 +1,6 @@
 <?php
 
-use Eclipse\Catalogue\Filament\Resources\ProductResource;
+use Eclipse\Catalogue\Filament\Resources\ProductResource\Pages\ListProducts;
 use Eclipse\Catalogue\Models\Category;
 use Eclipse\Catalogue\Models\Product;
 use Eclipse\Catalogue\Models\ProductData;
@@ -45,7 +45,7 @@ it('can filter products by category in table', function (): void {
         'is_active' => true,
     ]);
 
-    Livewire::test(ProductResource\Pages\ListProducts::class)
+    Livewire::test(ListProducts::class)
         ->filterTable('category_id', [$electronics->id])
         ->assertCanSeeTableRecords([$laptop])
         ->assertCanNotSeeTableRecords([$novel, $orphanProduct]);

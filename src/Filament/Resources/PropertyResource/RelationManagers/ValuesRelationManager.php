@@ -3,12 +3,21 @@
 namespace Eclipse\Catalogue\Filament\Resources\PropertyResource\RelationManagers;
 
 use Eclipse\Catalogue\Models\Property;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\Concerns\Translatable;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\RelationManagers\Concerns\Translatable;
 
 class ValuesRelationManager extends RelationManager
 {
@@ -18,22 +27,23 @@ class ValuesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'value';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('value')
+        return $schema
+            ->components([
+                TextInput::make('value')
+                    ->translatable()
                     ->label(__('eclipse-catalogue::property-value.fields.value'))
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\TextInput::make('info_url')
+                TextInput::make('info_url')
                     ->label(__('eclipse-catalogue::property-value.fields.info_url'))
                     ->helperText(__('eclipse-catalogue::property-value.help_text.info_url'))
                     ->url()
                     ->maxLength(255),
 
-                Forms\Components\FileUpload::make('image')
+                FileUpload::make('image')
                     ->label(__('eclipse-catalogue::property-value.fields.image'))
                     ->helperText(__('eclipse-catalogue::property-value.help_text.image'))
                     ->image()
@@ -74,26 +84,26 @@ class ValuesRelationManager extends RelationManager
 
         $table = $table
             ->columns([
-                Tables\Columns\TextColumn::make('value')
+                TextColumn::make('value')
                     ->label(__('eclipse-catalogue::property-value.table.columns.value'))
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\ImageColumn::make('image')
+                ImageColumn::make('image')
                     ->label(__('eclipse-catalogue::property-value.table.columns.image'))
                     ->disk('public')
                     ->size(40),
 
-                Tables\Columns\TextColumn::make('info_url')
+                TextColumn::make('info_url')
                     ->label(__('eclipse-catalogue::property-value.table.columns.info_url'))
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('products_count')
+                TextColumn::make('products_count')
                     ->label(__('eclipse-catalogue::property-value.table.columns.products_count'))
                     ->counts('products'),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('eclipse-catalogue::property-value.table.columns.created_at'))
                     ->dateTime()
                     ->sortable()
@@ -104,19 +114,20 @@ class ValuesRelationManager extends RelationManager
             ])
             ->deferLoading()
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                LocaleSwitcher::make(),
+                CreateAction::make()
                     ->modalWidth('lg')
                     ->modalHeading(__('eclipse-catalogue::property-value.modal.create_heading')),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                     ->modalWidth('lg')
                     ->modalHeading(__('eclipse-catalogue::property-value.modal.edit_heading')),
-                Tables\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
 
@@ -125,7 +136,7 @@ class ValuesRelationManager extends RelationManager
                 ->reorderable('sort')
                 ->defaultSort('sort')
                 ->reorderRecordsTriggerAction(
-                    fn (Tables\Actions\Action $action, bool $isReordering) => $action
+                    fn (Action $action, bool $isReordering) => $action
                         ->button()
                         ->label($isReordering ? 'Disable reordering' : 'Enable reordering')
                         ->icon($isReordering ? 'heroicon-o-x-mark' : 'heroicon-o-arrows-up-down')

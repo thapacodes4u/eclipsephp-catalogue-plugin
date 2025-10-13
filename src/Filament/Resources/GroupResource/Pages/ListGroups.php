@@ -3,7 +3,7 @@
 namespace Eclipse\Catalogue\Filament\Resources\GroupResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\GroupResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListGroups extends ListRecords
@@ -13,7 +13,7 @@ class ListGroups extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

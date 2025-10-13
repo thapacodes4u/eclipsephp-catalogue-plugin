@@ -4,9 +4,9 @@ namespace Eclipse\Catalogue\Filament\Resources\ProductTypeResource\Pages;
 
 use Eclipse\Catalogue\Filament\Resources\ProductTypeResource;
 use Filament\Actions\CreateAction;
-use Filament\Actions\LocaleSwitcher;
-use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Pages\ListRecords;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 
 class ListProductTypes extends ListRecords
 {

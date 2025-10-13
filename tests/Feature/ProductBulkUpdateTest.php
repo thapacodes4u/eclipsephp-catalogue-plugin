@@ -5,9 +5,13 @@ use Eclipse\Catalogue\Models\Category;
 use Eclipse\Catalogue\Models\Group;
 use Eclipse\Catalogue\Models\PriceList;
 use Eclipse\Catalogue\Models\Product;
+use Eclipse\Catalogue\Models\Product\Price;
 use Eclipse\Catalogue\Models\ProductData;
+use Eclipse\Catalogue\Models\ProductType;
 use Eclipse\Catalogue\Services\ProductBulkUpdater;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Workbench\App\Models\Site;
 
 uses(RefreshDatabase::class);
 
@@ -23,7 +27,7 @@ it('can instantiate the bulk update action without errors', function (): void {
 
 it('respects no-change vs blank update for category and toggle fields', function (): void {
     $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-    $siteId = \Workbench\App\Models\Site::first()->id;
+    $siteId = Site::first()->id;
 
     $catA = Category::factory()->create();
     $product = Product::factory()->create();
@@ -62,9 +66,9 @@ it('respects no-change vs blank update for category and toggle fields', function
 
 it('groups add/remove are tenant-aware', function (): void {
     $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-    $site = \Filament\Facades\Filament::getTenant();
+    $site = Filament::getTenant();
 
-    $otherSite = \Workbench\App\Models\Site::factory()->create();
+    $otherSite = Site::factory()->create();
 
     // Group for current tenant
     $gCurrent = Group::factory()->create([$tenantFK => $site->id, 'is_active' => true]);
@@ -99,7 +103,7 @@ it('groups add/remove are tenant-aware', function (): void {
 
 it('inserts price correctly', function (): void {
     $tenantFK = config('eclipse-catalogue.tenancy.foreign_key', 'site_id');
-    $site = \Filament\Facades\Filament::getTenant();
+    $site = Filament::getTenant();
 
     $priceList = PriceList::factory()->create();
     // Enable list for current tenant
@@ -120,7 +124,7 @@ it('inserts price correctly', function (): void {
     ], [$product]);
 
     expect($result['successCount'])->toBe(1);
-    $price = \Eclipse\Catalogue\Models\Product\Price::query()
+    $price = Price::query()
         ->where('product_id', $product->id)
         ->where('price_list_id', $priceList->id)
         ->whereDate('valid_from', $today)
@@ -132,12 +136,12 @@ it('inserts price correctly', function (): void {
 });
 
 it('rolls back only the failing product inside per-product transaction', function (): void {
-    $type = \Eclipse\Catalogue\Models\ProductType::factory()->create();
+    $type = ProductType::factory()->create();
     $p1 = Product::factory()->create(['product_type_id' => $type->id]);
     $p2 = Product::factory()->create(['product_type_id' => $type->id]);
 
     // Make saving p1 fail when changing product type
-    \Eclipse\Catalogue\Models\Product::saving(function ($model) use ($p1) {
+    Product::saving(function ($model) use ($p1) {
         if ($model->id === $p1->id && $model->isDirty('product_type_id')) {
             throw new Exception('Induced failure');
         }

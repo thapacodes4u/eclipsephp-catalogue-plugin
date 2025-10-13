@@ -4,6 +4,7 @@ namespace Eclipse\Catalogue\Models;
 
 use Eclipse\Catalogue\Factories\GroupFactory;
 use Eclipse\Common\Foundation\Models\Scopes\ActiveScope;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,7 +38,7 @@ class Group extends Model
     public function scopeForCurrentTenant(Builder $query): Builder
     {
         $tenantFK = config('eclipse-catalogue.tenancy.foreign_key');
-        $tenant = \Filament\Facades\Filament::getTenant();
+        $tenant = Filament::getTenant();
 
         if ($tenantFK && $tenant) {
             $query->where($tenantFK, $tenant->id);

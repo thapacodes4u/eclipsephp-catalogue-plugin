@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -134,11 +135,11 @@ class PropertyValue extends Model implements HasMedia
             $target = self::query()->lockForUpdate()->findOrFail($targetId);
 
             if ($target->id === $this->id) {
-                throw new \RuntimeException('Cannot merge a value into itself.');
+                throw new RuntimeException('Cannot merge a value into itself.');
             }
 
             if ($target->property_id !== $this->property_id) {
-                throw new \RuntimeException('Values must belong to the same property.');
+                throw new RuntimeException('Values must belong to the same property.');
             }
 
             $pivotTable = 'catalogue_product_has_property_value';
