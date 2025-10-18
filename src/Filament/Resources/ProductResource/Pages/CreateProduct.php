@@ -11,7 +11,6 @@ use Eclipse\Catalogue\Models\Property;
 use Eclipse\Catalogue\Traits\HandlesTenantData;
 use Eclipse\Catalogue\Traits\HasTenantFields;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use LaraZeus\SpatieTranslatable\Resources\Pages\CreateRecord\Concerns\Translatable;
@@ -33,6 +32,11 @@ class CreateProduct extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        if (isset($data['images'])) {
+            $this->temporaryImages = $data['images'];
+            unset($data['images']);
+        }
+
         foreach (array_keys($data) as $key) {
             if (str_starts_with($key, 'property_values_') || str_starts_with($key, 'custom_property_')) {
                 unset($data[$key]);
@@ -50,11 +54,6 @@ class CreateProduct extends CreateRecord
     protected function getFormMutuallyExclusiveFlagSets(): array
     {
         return [];
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema;
     }
 
     protected function handleRecordCreation(array $data): Model
@@ -92,6 +91,60 @@ class CreateProduct extends CreateRecord
 
         if (! $product) {
             return;
+        }
+
+        // Handle image uploads (from HandlesImageUploads trait logic)
+        $pendingImages = $this->temporaryImages;
+
+        if (! empty($pendingImages) && is_array($pendingImages)) {
+            foreach ($pendingImages as $index => $item) {
+                if (isset($item['temp_file'])) {
+                    $tempPath = storage_path('app/public/'.$item['temp_file']);
+
+                    if (file_exists($tempPath)) {
+                        $this->record->addMedia($tempPath)
+                            ->usingFileName($item['file_name'] ?? basename($tempPath))
+                            ->withCustomProperties([
+                                'name' => $item['name'] ?? [],
+                                'description' => $item['description'] ?? [],
+                                'is_cover' => $item['is_cover'] ?? false,
+                                'position' => $index,
+                            ])
+                            ->toMediaCollection('images');
+
+                        @unlink($tempPath);
+                    }
+                } elseif (isset($item['temp_url'])) {
+                    try {
+                        $this->record->addMediaFromUrl($item['temp_url'])
+                            ->usingFileName($item['file_name'] ?? basename($item['temp_url']))
+                            ->withCustomProperties([
+                                'name' => $item['name'] ?? [],
+                                'description' => $item['description'] ?? [],
+                                'is_cover' => $item['is_cover'] ?? false,
+                                'position' => $index,
+                            ])
+                            ->toMediaCollection('images');
+                    } catch (\Exception $e) {
+                    }
+                }
+            }
+
+            $coverMedia = $this->record->getMedia('images')
+                ->filter(fn ($media) => $media->getCustomProperty('is_cover', false));
+
+            if ($coverMedia->count() > 1) {
+                $coverMedia->skip(1)->each(function ($media) {
+                    $media->setCustomProperty('is_cover', false);
+                    $media->save();
+                });
+            }
+
+            if ($coverMedia->count() === 0 && $this->record->getMedia('images')->count() > 0) {
+                $firstMedia = $this->record->getMedia('images')->first();
+                $firstMedia->setCustomProperty('is_cover', true);
+                $firstMedia->save();
+            }
         }
 
         $state = $this->form->getState();

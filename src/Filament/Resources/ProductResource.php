@@ -4,7 +4,6 @@ namespace Eclipse\Catalogue\Filament\Resources;
 
 use Eclipse\Catalogue\Enums\PropertyInputType;
 use Eclipse\Catalogue\Filament\Filters\CustomPropertyConstraint;
-use Eclipse\Catalogue\Filament\Forms\Components\ImageManager;
 use Eclipse\Catalogue\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Eclipse\Catalogue\Filament\Resources\ProductResource\Pages\EditProduct;
 use Eclipse\Catalogue\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -21,6 +20,7 @@ use Eclipse\Catalogue\Models\Property;
 use Eclipse\Catalogue\Support\LabelType;
 use Eclipse\Catalogue\Traits\HandlesTenantData;
 use Eclipse\Catalogue\Traits\HasTenantFields;
+use Eclipse\Common\Filament\Forms\Components\MediaGallery;
 use Eclipse\World\Models\Country;
 use Eclipse\World\Models\TariffCode;
 use Filament\Actions\ActionGroup;
@@ -560,10 +560,14 @@ class ProductResource extends Resource
 
                         Tab::make('Images')
                             ->schema([
-                                ImageManager::make('images')
+                                MediaGallery::make('images')
                                     ->label('')
                                     ->collection('images')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+                                    ->allowUploads()
+                                    ->preview()
+                                    ->orderable()
+                                    ->mediaColumns(4)
                                     ->columnSpanFull(),
                             ]),
                     ])

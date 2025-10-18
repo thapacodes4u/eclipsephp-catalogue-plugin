@@ -15,7 +15,6 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable;
@@ -215,11 +214,6 @@ class EditProduct extends EditRecord
     protected function getFormMutuallyExclusiveFlagSets(): array
     {
         return [];
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema;
     }
 
     protected function getFormActions(): array
